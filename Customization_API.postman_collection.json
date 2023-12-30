@@ -1,0 +1,3552 @@
+{
+	"info": {
+		"_postman_id": "505b9193-852c-4c63-96f2-8d08e1838562",
+		"name": "Customization_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23129003"
+	},
+	"item": [
+		{
+			"name": "company theme",
+			"item": [
+				{
+					"name": "Fetch auth token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"jwt_access_token\", jsonData.access_token);",
+									"",
+									" function parseJwt (token,part) {",
+									"   var base64Url = token.split('.')[part];",
+									"   var words = CryptoJS.enc.Base64.parse(base64Url);",
+									"   var jsonPayload = CryptoJS.enc.Utf8.stringify(words);",
+									"   return  JSON.parse(jsonPayload);",
+									"};",
+									"",
+									"var jwtInfo ={};",
+									"jwtInfo.size = jsonData.access_token.length;",
+									"jwtInfo.header = parseJwt(jsonData.access_token,0);",
+									"jwtInfo.payload = parseJwt(jsonData.access_token,1);",
+									"jwtInfo.signature = jsonData.access_token.split('.')[2];",
+									"jwtInfo.expires = ((jwtInfo.payload.exp-Date.now().valueOf()/1000)/60).toFixed(1);",
+									"console.log(jwtInfo);",
+									"",
+									"var template = `",
+									"<b>JWT  Size:{{response.size}}Bytes. Expires in {{response.expires}} minutes</b><br>",
+									"<b>Header </b>",
+									"    <table>",
+									"        <tr><th>Property</th><th>Value</th></tr>",
+									"        {{#each response.header}}",
+									"            <tr><td>{{@key}}</td><td>{{.}}</td></tr>",
+									"        {{/each}}",
+									"    </table>",
+									"<b>Payload</b>",
+									"    <table>",
+									"        <tr><th>Property</th><th>Value</th></tr>",
+									"        {{#each response.payload}}",
+									"            <tr><td>{{@key}}</td><td>{{.}}</td></tr>",
+									"        {{/each}}",
+									"    </table>",
+									" <b>Claims</b>",
+									"    <table bgcolor=\"#FFFFFF\">",
+									"        <tr><th>Claim</th><th>Value</th></tr>",
+									"        {{#each response.payload.Claims}}",
+									"            <tr>",
+									"                {{#each this}}",
+									"                    <td>{{.}}</td>       ",
+									"                {{/each}}",
+									"            </tr>",
+									"        {{/each}}",
+									"    </table>",
+									"  <i>signature:{{response.signature}}</i>",
+									"`;",
+									"pm.visualizer.set(template, {response: jwtInfo});",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"let [header, payload, signature] = jsonData.access_token.split('.');",
+									"",
+									"function decode(x) {",
+									"    let wordArray = CryptoJS.enc.Base64.parse(x);",
+									"    let str = CryptoJS.enc.Utf8.stringify(wordArray);",
+									"    return JSON.parse(str);",
+									"}",
+									"",
+									"console.log(\"Header: \", decode(header));",
+									"console.log(\"Payload: \", decode(payload));",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"token_type: Bearer\", function () {",
+									"pm.expect(jsonData.token_type).to.eql(\"Bearer\");",
+									"});",
+									"pm.test(\"expires_in: 86400 seconds\", function () {",
+									"pm.expect(jsonData.expires_in).to.eql(86400);",
+									"});",
+									"",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"access_token\":{\"type\":\"string\"},",
+									"            \"token_type\":{\"type\":\"string\"},",
+									"            \"expires_in\":{\"type\":\"integer\"}",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": \"{{client_id}}\",\n    \"client_secret\": \"{{client_secret}}\",\n    \"audience\": \"{{audience}}\",\n    \"grant_type\": \"{{grant_type}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/oauth/token",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "return company customization theme for all events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name: Introvoke Platform Default Theme\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Sequel Platform Default Theme\");",
+									"});",
+									"",
+									"pm.test(\"defaultTheme: true\", function () {",
+									"pm.expect(jsonData.defaultTheme).to.eql(true);",
+									"});",
+									"",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"defaultTheme\":{\"type\":\"boolean\"},",
+									"            \"brandColors\":{\"type\":\"array\"},",
+									"            \"fonts\":{\"type\":\"array\",",
+									"                properties: {",
+									"                    \"isPrimary\": {\"type\":\"boolean\"},",
+									"                    \"fontName\": {\"type\":\"string\"},",
+									"                    \"fontUrl\": {\"type\":\"string\"}",
+									"",
+									"            }},",
+									"            \"virtualStage\":{\"type\":\"object\",",
+									"               \"background\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"watermark\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"countdown\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"                \"presenter\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"glowColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"             ",
+									"            },",
+									"",
+									"            \"networkingHub\":{\"type\":\"object\",",
+									"               \"circleGraphics\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"joinNetworking\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"returnToStage\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"             ",
+									"            },",
+									"",
+									"            \"warningNotices\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"buttonColor\": {\"type\":\"null\" || \"string\"}",
+									"                ",
+									"            }},",
+									"",
+									"            \"chat\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"},",
+									"                    \"colors\": {\"type\":\"null\" || \"string\"},",
+									"                    \"badge\": {\"type\":\"object\",",
+									"                             properties: {",
+									"                            \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                            \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                            \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}}},",
+									"",
+									"            \"participantList\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"qna\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"polls\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"privateMessages\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"poweredByIntrovokeLabel\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/companies/{{companyId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"companies",
+								"{{companyId}}",
+								"theme"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "invalid companyId_return company customization theme for all events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/companies/{{invalid_companyId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"companies",
+								"{{invalid_companyId}}",
+								"theme"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "without token_return company customization theme for all events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/companies/{{companyId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"companies",
+								"{{companyId}}",
+								"theme"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_return company customization theme for all events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{wrong_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/companies/{{companyId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"companies",
+								"{{companyId}}",
+								"theme"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### **Returns the event customization theme for all events for the company based on the business rules.**\n\n### [**https://docs.introvoke.com/reference/get_v3-companies-companyid-theme**](https://docs.introvoke.com/reference/get_v3-companies-companyid-theme)"
+		},
+		{
+			"name": "event theme",
+			"item": [
+				{
+					"name": "create new event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.environment.set('eventId', pm.response.json().uid);",
+									"",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"companyUid\", function () {",
+									"pm.expect(jsonData.companyUid).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"",
+									"pm.test(\"startDate\", function () {",
+									"pm.expect(jsonData.startDate).to.eql(pm.environment.get(\"event_startDate\"));",
+									"});",
+									"",
+									"pm.test(\"endDate\", function () {",
+									"pm.expect(jsonData.endDate).to.eql(pm.environment.get(\"event_endDate\"));",
+									"});",
+									"",
+									"pm.test(\"name\", function () {",
+									"pm.expect(jsonData.name).to.eql(pm.environment.get(\"event_name\"));",
+									"});",
+									"",
+									"pm.test(\"timezone\", function () {",
+									"pm.expect(jsonData.timezone).to.eql(pm.environment.get(\"event_timezone\"));",
+									"});",
+									"",
+									"pm.test(\"type\", function () {",
+									"pm.expect(jsonData.type).to.eql(pm.environment.get(\"event_type\"));",
+									"});",
+									"",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"companyUid\":{\"type\":\"string\"},",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"timezone\":{\"type\":\"string\"},",
+									"            \"type\":{\"type\":\"string\"},",
+									"            \"eventInfo\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"privateEventInfo\":{\"type\": \"object\",",
+									"                    properties:{",
+									"                        \"attendeePasscode\": {\"type\":\"string\"},",
+									"                        \"presenterPasscode\": {\"type\":\"string\"},",
+									"                        \"hostPasscode\": {\"type\":\"string\"},",
+									"                        \"rtmpKey\": {\"type\":\"string\"},",
+									"                        \"rtmpUrl\": {\"type\":\"string\"}",
+									"",
+									"                    }",
+									"                }",
+									"            },",
+									"            ",
+									"        }",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyId\": \"{{companyId}}\",\n    \"name\": \"{{event_name}}\",\n    \"startDate\": \"{{event_startDate}}\",\n    \"endDate\": \"{{event_endDate}}\",\n    \"timezone\": \"{{event_timezone}}\",\n    \"type\": \"{{event_type}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "return event customization theme for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name: Introvoke Platform Default Theme\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Sequel Platform Default Theme\");",
+									"});",
+									"",
+									"pm.test(\"defaultTheme: true\", function () {",
+									"pm.expect(jsonData.defaultTheme).to.eql(true);",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"defaultTheme\":{\"type\":\"boolean\"},",
+									"            \"brandColors\":{\"type\":\"array\"},",
+									"            \"fonts\":{\"type\":\"array\",",
+									"                properties: {",
+									"                    \"isPrimary\": {\"type\":\"boolean\"},",
+									"                    \"fontName\": {\"type\":\"string\"},",
+									"                    \"fontUrl\": {\"type\":\"string\"}",
+									"",
+									"            }},",
+									"            \"virtualStage\":{\"type\":\"object\",",
+									"               \"background\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"watermark\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"countdown\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"                \"presenter\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"glowColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"             ",
+									"            },",
+									"",
+									"            \"networkingHub\":{\"type\":\"object\",",
+									"               \"circleGraphics\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"joinNetworking\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"returnToStage\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"             ",
+									"            },",
+									"",
+									"            \"warningNotices\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"buttonColor\": {\"type\":\"null\" || \"string\"}",
+									"                ",
+									"            }},",
+									"",
+									"            \"chat\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"},",
+									"                    \"colors\": {\"type\":\"null\" || \"string\"},",
+									"                    \"badge\": {\"type\":\"object\",",
+									"                             properties: {",
+									"                            \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                            \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                            \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}}},",
+									"",
+									"            \"participantList\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"qna\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"polls\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"privateMessages\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"poweredByIntrovokeLabel\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/events/{{eventId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"events",
+								"{{eventId}}",
+								"theme"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "invalid eventId_return event customization theme for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/events/{{invalid_eventId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"events",
+								"{{invalid_eventId}}",
+								"theme"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "without token_return event customization theme for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/events/{{eventId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"events",
+								"{{eventId}}",
+								"theme"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_return event customization theme for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{wrong_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/events/{{eventId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"events",
+								"{{eventId}}",
+								"theme"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### **Returns the event customization theme for the event based on the business rules.**\n\n### [**https://docs.introvoke.com/reference/get_v3-events-eventid-theme**](https://docs.introvoke.com/reference/get_v3-events-eventid-theme)"
+		},
+		{
+			"name": "platform",
+			"item": [
+				{
+					"name": "default customization theme",
+					"item": [
+						{
+							"name": "return default event customization theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"name: Introvoke Platform Default Theme\", function () {",
+											"pm.expect(jsonData.name).to.eql(\"Sequel Platform Default Theme\");",
+											"});",
+											"",
+											"pm.test(\"defaultTheme: true\", function () {",
+											"pm.expect(jsonData.defaultTheme).to.eql(true);",
+											"});",
+											"",
+											"",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"name\":{\"type\":\"string\"},",
+											"            \"defaultTheme\":{\"type\":\"boolean\"},",
+											"            \"brandColors\":{\"type\":\"array\"},",
+											"            \"fonts\":{\"type\":\"array\",",
+											"                properties: {",
+											"                    \"isPrimary\": {\"type\":\"boolean\"},",
+											"                    \"fontName\": {\"type\":\"string\"},",
+											"                    \"fontUrl\": {\"type\":\"string\"}",
+											"",
+											"            }},",
+											"            \"virtualStage\":{\"type\":\"object\",",
+											"               \"background\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"               \"watermark\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"               \"countdown\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }}, ",
+											"                \"presenter\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"glowColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"             ",
+											"            },",
+											"",
+											"            \"networkingHub\":{\"type\":\"object\",",
+											"               \"circleGraphics\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"               \"joinNetworking\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"               \"returnToStage\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }}, ",
+											"             ",
+											"            },",
+											"",
+											"            \"warningNotices\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"buttonColor\": {\"type\":\"null\" || \"string\"}",
+											"                ",
+											"            }},",
+											"",
+											"            \"chat\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"},",
+											"                    \"colors\": {\"type\":\"null\" || \"string\"},",
+											"                    \"badge\": {\"type\":\"object\",",
+											"                             properties: {",
+											"                            \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                            \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                            \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }}}},",
+											"",
+											"            \"participantList\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"",
+											"            \"qna\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"",
+											"            \"polls\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"",
+											"            \"privateMessages\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"",
+											"            \"poweredByIntrovokeLabel\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/default",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"default"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return default event customization theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/default",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"default"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return default event customization theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/default",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"default"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Returns the default event customization theme that applies to all events, unless overridden at the company and event level. This endpoint can be used for clients which update to theme or for preview. The default theme can be used as a starting point to edit new themes.**\n\n### [https://docs.introvoke.com/reference/get_customizations-events-default](https://docs.introvoke.com/reference/get_customizations-events-default)"
+				},
+				{
+					"name": "color pallets",
+					"item": [
+						{
+							"name": "return array of color pallets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/suggested-color-pallets",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"suggested-color-pallets"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return array of color pallets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/suggested-color-pallets",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"suggested-color-pallets"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return array of color pallets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/suggested-color-pallets",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"suggested-color-pallets"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Returns an array of color pallets (with primary, secondary and tertiary colors) that can be used in the editor. This endpoint can be used for clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-suggested-color-pallets**](https://docs.introvoke.com/reference/get_customizations-events-suggested-color-pallets)"
+				}
+			],
+			"description": "### **Returns the default event customization theme that applies to all events.**"
+		},
+		{
+			"name": "company theme overrides",
+			"item": [
+				{
+					"name": "add-update event customization theme overrides",
+					"item": [
+						{
+							"name": "add company customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 202 Accepted\", function () {",
+											"    pm.response.to.have.status(202);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Testing theme\",\n    \"defaultTheme\": true,\n    \"brandColors\": [\n        \"#ff6c43\",\n        \"#302c66\",\n        \"#333333\"\n    ],\n    \"fonts\": [\n        {\"fontName\": \"Inter\",\n            \"fontUrl\": \"https://fonts.googleapis.com/css2?family=Inter&display=swap\",\n            \"isPrimary\": true\n        }\n    ],\n    \"virtualStage\": {\n        \"background\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"watermark\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"countdown\": {\n            \"textColor\": null\n        },\n        \"presenter\": {\n            \"glowColor\": null\n        }\n    },\n    \"networkingHub\": {\n        \"circleGraphics\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"joinNetworking\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"returnToStage\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"warningNotices\": {\n        \"buttonColor\": null\n    },\n    \"chat\": {\n        \"enabled\": true,\n        \"colors\": null,\n        \"badge\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"participantList\": {\n        \"enabled\": true\n    },\n    \"qna\": {\n        \"enabled\": true\n    },\n    \"polls\": {\n        \"enabled\": true\n    },\n    \"privateMessages\": {\n        \"enabled\": true\n    },\n    \"poweredByIntrovokeLabel\": {\n        \"enabled\": true\n    },\n    \"liveReactions\": {\n        \"enabled\": true\n    },\n    \"chatReactions\": {\n        \"enabled\": true\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update with wrong schema",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Introvoke Event Customization Theme does not match the schema.\", function () {",
+											"pm.expect(jsonData.message).to.eql(\"Introvoke Event Customization Theme does not match the schema.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_add company customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"dsfgdb\",\n    \"defaultTheme\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{invalid_companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_add company customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_add company customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### Adds or updates event customization theme overrides that will be applied to the all events for the company. This endpoint can be used by clients which update to theme or for preview.\n\n### [**https://docs.introvoke.com/reference/post_customizations-events-company-companyid-all-events**](https://docs.introvoke.com/reference/post_customizations-events-company-companyid-all-events)"
+				},
+				{
+					"name": "return company theme overrides",
+					"item": [
+						{
+							"name": "return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"name: Testing theme\", function () {",
+											"pm.expect(jsonData.name).to.eql(\"Testing theme\");",
+											"});",
+											"",
+											"pm.test(\"defaultTheme: true\", function () {",
+											"pm.expect(jsonData.defaultTheme).to.eql(true);",
+											"});",
+											"",
+											"pm.test(\"fonts: isPrimary true\", function () {",
+											"pm.expect(jsonData.fonts[0].isPrimary).to.eql(true);",
+											"});",
+											"",
+											"pm.test(\"fontName: Inter\", function () {",
+											"pm.expect(jsonData.fonts[0].fontName).to.eql(\"Inter\");",
+											"});",
+											"",
+											"pm.test(\"fontUrl\", function () {",
+											"pm.expect(jsonData.fonts[0].fontUrl).to.eql(\"https://fonts.googleapis.com/css2?family=Inter&display=swap\");",
+											"});",
+											"",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"name\":{\"type\":\"string\"},",
+											"            \"defaultTheme\":{\"type\":\"boolean\"},",
+											"            \"brandColors\":{\"type\":\"array\"},",
+											"            \"fonts\":{\"type\":\"array\",",
+											"                properties: {",
+											"                    \"isPrimary\": {\"type\":\"boolean\"},",
+											"                    \"fontName\": {\"type\":\"string\"},",
+											"                    \"fontUrl\": {\"type\":\"string\"}",
+											"",
+											"            }},",
+											"            ",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400 Bad Request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{invalid_companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{invalid_companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{invalid_companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Returns the event customization theme overrides over the platform event customization theme that applies to all events for the company, unless overridden at the event level. This endpoint can be used for clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-company-companyid-all-events**](https://docs.introvoke.com/reference/get_customizations-events-company-companyid-all-events)"
+				},
+				{
+					"name": "delete event customization theme overrides",
+					"item": [
+						{
+							"name": "delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete again event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{invalid_companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"all-events"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Deletes the event customization theme for company. The events without their own customization will use the default Introvoke Platform theme, after deletion.**\n\n### [**https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-all-events**](https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-all-events)"
+				}
+			]
+		},
+		{
+			"name": "event theme overrides",
+			"item": [
+				{
+					"name": "add-update event customization theme overrides",
+					"item": [
+						{
+							"name": "add event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 202 Accepted\", function () {",
+											"    pm.response.to.have.status(202);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Testing theme\",\n    \"defaultTheme\": true,\n    \"brandColors\": [\n        \"#ff6c43\",\n        \"#302c66\",\n        \"#333333\"\n    ],\n    \"fonts\": [\n        {\"fontName\": \"Inter\",\n            \"fontUrl\": \"https://fonts.googleapis.com/css2?family=Inter&display=swap\",\n            \"isPrimary\": true\n        }\n    ],\n    \"virtualStage\": {\n        \"background\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"watermark\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"countdown\": {\n            \"textColor\": null\n        },\n        \"presenter\": {\n            \"glowColor\": null\n        }\n    },\n    \"networkingHub\": {\n        \"circleGraphics\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"joinNetworking\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"returnToStage\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"warningNotices\": {\n        \"buttonColor\": null\n    },\n    \"chat\": {\n        \"enabled\": true,\n        \"colors\": null,\n        \"badge\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"participantList\": {\n        \"enabled\": true\n    },\n    \"qna\": {\n        \"enabled\": true\n    },\n    \"polls\": {\n        \"enabled\": true\n    },\n    \"privateMessages\": {\n        \"enabled\": true\n    },\n    \"poweredByIntrovokeLabel\": {\n        \"enabled\": true\n    },\n    \"liveReactions\": {\n        \"enabled\": true\n    },\n    \"chatReactions\": {\n        \"enabled\": true\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update with wrong schema",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Introvoke Event Customization Theme does not match the schema.\", function () {",
+											"pm.expect(jsonData.message).to.eql(\"Introvoke Event Customization Theme does not match the schema.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid eventId_add event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"dsfgdb\",\n    \"defaultTheme\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{invalid_eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{invalid_eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_add event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_add event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Adds or updates event customization theme overrides that will be applied for the event. This endpoint can be used by clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/post_customizations-events-event-eventid**](https://docs.introvoke.com/reference/post_customizations-events-event-eventid)"
+				},
+				{
+					"name": "return event theme overrides",
+					"item": [
+						{
+							"name": "return event theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"name: Testing theme\", function () {",
+											"pm.expect(jsonData.name).to.eql(\"Testing theme\");",
+											"});",
+											"",
+											"pm.test(\"defaultTheme: true\", function () {",
+											"pm.expect(jsonData.defaultTheme).to.eql(true);",
+											"});",
+											"",
+											"pm.test(\"fonts: isPrimary true\", function () {",
+											"pm.expect(jsonData.fonts[0].isPrimary).to.eql(true);",
+											"});",
+											"",
+											"pm.test(\"fontName: Inter\", function () {",
+											"pm.expect(jsonData.fonts[0].fontName).to.eql(\"Inter\");",
+											"});",
+											"",
+											"pm.test(\"fontUrl\", function () {",
+											"pm.expect(jsonData.fonts[0].fontUrl).to.eql(\"https://fonts.googleapis.com/css2?family=Inter&display=swap\");",
+											"});",
+											"",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"name\":{\"type\":\"string\"},",
+											"            \"defaultTheme\":{\"type\":\"boolean\"},",
+											"            \"brandColors\":{\"type\":\"array\"},",
+											"            \"fonts\":{\"type\":\"array\",",
+											"                properties: {",
+											"                    \"isPrimary\": {\"type\":\"boolean\"},",
+											"                    \"fontName\": {\"type\":\"string\"},",
+											"                    \"fontUrl\": {\"type\":\"string\"}",
+											"",
+											"            }},",
+											"            ",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_return event theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400 Bad Request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{invalid_eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{invalid_eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return event theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return event theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Returns the event customization theme overrides over the platform and event company customization theme for the event. This endpoint can be used for clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-event-eventid**](https://docs.introvoke.com/reference/get_customizations-events-event-eventid)"
+				},
+				{
+					"name": "delete event customization theme overrides",
+					"item": [
+						{
+							"name": "delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete again event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400 Bad Request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{invalid_eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{invalid_eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete event",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/v1/event/{{eventId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"event",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Deletes the event customization theme overrides for the event. All events default to company specific event customization theme, if it exists or the default platform theme, after deletion.**\n\n### [**https://docs.introvoke.com/reference/delete_customizations-events-event-eventid**](https://docs.introvoke.com/reference/delete_customizations-events-event-eventid)"
+				}
+			]
+		},
+		{
+			"name": "company theme fonts",
+			"item": [
+				{
+					"name": "add new fonts for the company",
+					"item": [
+						{
+							"name": "add new font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 202 Accepted\", function () {",
+											"    pm.response.to.have.status(202);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"pm.environment.set(\"font_id\", jsonData.uid);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"fontName\": \"Inter\",\n    \"fontUrl\": \"https://fonts.googleapis.com/css2?family=Inter&display=swap\",\n    \"isIntrovokeManaged\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add with wrong schema Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Font Info does not match the schema.\", function () {",
+											"pm.expect(jsonData.message).to.eql(\"Font Info does not match the schema.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"fontName\": \"\",\n    \"fontUrl\": \"\",\n    \"isIntrovokeManaged\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_add new font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"uid\": \"\",\n    \"fontName\": \"\",\n    \"fontUrl\": \"\",\n    \"isIntrovokeManaged\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/fonts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{invalid_companyId}}",
+										"fonts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_add new font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_add new font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Add new fonts for the company. The value is stored at the company level, but can be used by customization themes on both event and company levels. If the name of the font, matches the existing font, it will update the font URL.**\n\n### [**https://docs.introvoke.com/reference/post_customizations-events-company-companyid-fonts**](https://docs.introvoke.com/reference/post_customizations-events-company-companyid-fonts)"
+				},
+				{
+					"name": "return list of customized fonts",
+					"item": [
+						{
+							"name": "return font list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"uid\", function () {",
+											"pm.expect(jsonData[1].uid).to.eql(pm.environment.get(\"font_id\"));",
+											"});",
+											"pm.test(\"fontName\", function () {",
+											"pm.expect(jsonData[1].fontName).to.eql(\"Inter\");",
+											"});",
+											"pm.test(\"fontUrl\", function () {",
+											"pm.expect(jsonData[1].fontUrl).to.eql(\"https://fonts.googleapis.com/css2?family=Inter&display=swap\");",
+											"});",
+											"pm.test(\"isIntrovokeManaged\", function () {",
+											"pm.expect(jsonData[1].isIntrovokeManaged).to.eql(true);",
+											"});",
+											"",
+											"",
+											"//schema vaildation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"array\",",
+											"        properties:{",
+											"            \"uid\":{\"type\":\"string\"},",
+											"            \"fontName\":{\"type\":\"string\"},",
+											"            \"fontUrl\":{\"type\":\"string\"},",
+											"            \"isIntrovokeManaged\":{\"type\":\"string\"},",
+											"            ",
+											"    }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_return font list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/fonts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{invalid_companyId}}",
+										"fonts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return font list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return font list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Returns list of customized fonts associated with the company.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-company-companyid-fonts**](https://docs.introvoke.com/reference/get_customizations-events-company-companyid-fonts)"
+				},
+				{
+					"name": "unregister font associated with company",
+					"item": [
+						{
+							"name": "unregister font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts/font/{{font_id}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts",
+										"font",
+										"{{font_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "again unregister same font id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts/font/{{font_id}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts",
+										"font",
+										"{{font_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_unregister font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/fonts/font/{{font_id}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{invalid_companyId}}",
+										"fonts",
+										"font",
+										"{{font_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_unregister font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts/font/{{fontId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts",
+										"font",
+										"{{fontId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_unregister font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts/font/{{fontId}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"customizations",
+										"events",
+										"company",
+										"{{companyId}}",
+										"fonts",
+										"font",
+										"{{fontId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "### **Unregister the specified font associated with the specified company.**\n\n### [**https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-fonts-font-fontid**](https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-fonts-font-fontid)"
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

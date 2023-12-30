@@ -1,0 +1,3134 @@
+{
+	"info": {
+		"_postman_id": "986cb8ca-355c-4f94-9f64-b22ebe8ab560",
+		"name": "Usage_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23129003"
+	},
+	"item": [
+		{
+			"name": "company",
+			"item": [
+				{
+					"name": "top-participants",
+					"item": [
+						{
+							"name": "top-participants endpoint",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"company\":{\"type\":\"string\"},",
+											"            \"companyId\":{\"type\":\"string\"},",
+											"            \"startDate\":{\"type\":\"string\"},",
+											"            \"endDate\":{\"type\":\"string\"},",
+											"            \"limit\":{\"type\":\"string\" },",
+											"            \"eventType\":{\"type\":\"string\" },",
+											"            \"topParticipants\":{\"type\":\"array\",",
+											"                properties:{",
+											"                        \"name\": {\"type\":\"string\"},",
+											"                        \"userEmail\": {\"type\":\"string\"},",
+											"                        \"engagedMinutes\": {\"type\":\"integer\"},",
+											"                        \"eventCount\": {\"type\":\"integer\"}",
+											"                        ",
+											"                    },",
+											"            },",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{companyId}}/top-participants?startDate=2022-09-02&endDate=2024-10-12&limit=10&eventType=jdshvjhs",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"company",
+										"{{companyId}}",
+										"top-participants"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-02"
+										},
+										{
+											"key": "endDate",
+											"value": "2024-10-12"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "eventType",
+											"value": "jdshvjhs"
+										},
+										{
+											"key": "engagementType",
+											"value": "jshvdcjhsvcjhw",
+											"disabled": true
+										},
+										{
+											"key": "betaFlag",
+											"value": "kjbd67e",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "top-participants_invalid companyId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"",
+											"",
+											"pm.environment.set('errorMessage', pm.response.json().errorMessage);",
+											"",
+											"pm.test(\"errorMessage\", function () {",
+											"pm.expect(jsonData.errorMessage).to.eql(pm.environment.get(\"errorMessage\"));",
+											"});",
+											"pm.environment.unset(\"errorMessage\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{invalid_companyId}}/top-participants?startDate=2022-09-02&endDate=2024-10-12&limit=10&eventType=jdshvjhs",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"company",
+										"{{invalid_companyId}}",
+										"top-participants"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-02"
+										},
+										{
+											"key": "endDate",
+											"value": "2024-10-12"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "eventType",
+											"value": "jdshvjhs"
+										},
+										{
+											"key": "engagementType",
+											"value": "jshvdcjhsvcjhw",
+											"disabled": true
+										},
+										{
+											"key": "betaFlag",
+											"value": "kjbd67e",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "top-participants_without token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{companyId}}/top-participants?startDate=2022-09-02&endDate=2024-10-12&limit=10&eventType=jdshvjhs",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"company",
+										"{{companyId}}",
+										"top-participants"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-02"
+										},
+										{
+											"key": "endDate",
+											"value": "2024-10-12"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "eventType",
+											"value": "jdshvjhs"
+										},
+										{
+											"key": "engagementType",
+											"value": "jshvdcjhsvcjhw",
+											"disabled": true
+										},
+										{
+											"key": "betaFlag",
+											"value": "kjbd67e",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "top-participants_wrong token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{companyId}}/top-participants?startDate=2022-09-02&endDate=2024-10-12&limit=10&eventType=jdshvjhs",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"company",
+										"{{companyId}}",
+										"top-participants"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-02"
+										},
+										{
+											"key": "endDate",
+											"value": "2024-10-12"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "eventType",
+											"value": "jdshvjhs"
+										},
+										{
+											"key": "engagementType",
+											"value": "jshvdcjhsvcjhw",
+											"disabled": true
+										},
+										{
+											"key": "betaFlag",
+											"value": "kjbd67e",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### The endpoint returns list of top participants with names, e-mail address, number of events and total live minutes they have engaged on events hosted by the specified company within a date range and event type (if specified).\n\n#### You can return the total engagement for live and onDemand minutes or specify which engagement type you want to return by adding `engagementType` as `live` or `onDemand`.\n\n#### [https://docs.introvoke.com/reference/top-participants-by-event-type-for-a-company](https://docs.introvoke.com/reference/top-participants-by-event-type-for-a-company)"
+				},
+				{
+					"name": "events summary",
+					"item": [
+						{
+							"name": "events summary and average engagement time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"company\":{\"type\":\"string\"},",
+											"            \"companyId\":{\"type\":\"string\"},",
+											"            \"startDate\":{\"type\":\"string\"},",
+											"            \"endDate\":{\"type\":\"string\"},",
+											"            \"eventType\":{\"type\":\"string\" },",
+											"            \"events\":{\"type\":\"array\",",
+											"                properties:{",
+											"                        \"eventId\": {\"type\":\"string\"},",
+											"                        \"eventName\": {\"type\":\"string\"},",
+											"                        \"eventType\": {\"type\":\"string\"},",
+											"                        \"circleId\": {\"type\":\"string\"},",
+											"                        \"circleName\": {\"type\":\"string\"},",
+											"                        \"friendlyName\": {\"type\":\"string\"},",
+											"                        \"numberOfUsers\": {\"type\":\"integer\"},",
+											"                        \"averageEngagedMinutesByUser\": {\"type\":\"number\"}",
+											"                    },",
+											"            },",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{companyId}}/events",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"company",
+										"{{companyId}}",
+										"events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyid_events summary and average engagement time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"",
+											"",
+											"pm.environment.set('errorMessage', pm.response.json().errorMessage);",
+											"",
+											"pm.test(\"errorMessage\", function () {",
+											"pm.expect(jsonData.errorMessage).to.eql(pm.environment.get(\"errorMessage\"));",
+											"});",
+											"pm.environment.unset(\"errorMessage\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{invalid_companyId}}/events",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"company",
+										"{{invalid_companyId}}",
+										"events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_events summary and average engagement time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{companyId}}/events",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"company",
+										"{{companyId}}",
+										"events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_events summary and average engagement time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{companyId}}/events",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"company",
+										"{{companyId}}",
+										"events"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### The endpoint returns list of events within date range (past 30 days, default) for a company along with their attendance, total engagement minutes and their average engagement minutes for the session.\n\n#### [https://docs.introvoke.com/reference/events-summary-and-average-engagement-time](https://docs.introvoke.com/reference/events-summary-and-average-engagement-time)"
+				},
+				{
+					"name": "others",
+					"item": [
+						{
+							"name": "usage-details endpoint",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://stg-analytics.introvoke.com/api/analytics/company/{{companyId}}/usage-details?start=2020-10-12&end=2022-10-12&limit=600&detailsStartDate=2021-10-12",
+									"protocol": "https",
+									"host": [
+										"stg-analytics",
+										"introvoke",
+										"com"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"{{companyId}}",
+										"usage-details"
+									],
+									"query": [
+										{
+											"key": "start",
+											"value": "2020-10-12"
+										},
+										{
+											"key": "end",
+											"value": "2022-10-12"
+										},
+										{
+											"key": "limit",
+											"value": "600"
+										},
+										{
+											"key": "detailsStartDate",
+											"value": "2021-10-12"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "top-hosts endpoint",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://stg-analytics.introvoke.com/api/analytics/user-engagement/company/{{companyId}}/top-hosts",
+									"protocol": "https",
+									"host": [
+										"stg-analytics",
+										"introvoke",
+										"com"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"company",
+										"{{companyId}}",
+										"top-hosts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "attendance endpoint",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://stg-analytics.introvoke.com/api/analytics/company/{{companyId}}/attendance",
+									"protocol": "https",
+									"host": [
+										"stg-analytics",
+										"introvoke",
+										"com"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"{{companyId}}",
+										"attendance"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "wefdg.erer 4 ",
+											"disabled": true
+										},
+										{
+											"key": "endDate",
+											"value": "tery  43q",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "lifetime usage",
+					"item": [
+						{
+							"name": "lifetime usage for a company",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"company\":{\"type\":\"string\"},",
+											"            ",
+											"            \"lifetime\":{\"type\":\"object\",",
+											"                properties:{",
+											"                    \"summary\":{\"type\":\"object\",",
+											"                            properties:{",
+											"                                \"liveMinutes\": {\"type\":\"integer\"},",
+											"                                \"onDemandMinutes\": {\"type\":\"integer\"},",
+											"                                \"liveEventCount\": {\"type\":\"integer\"},",
+											"                                \"onDemandEventCount\": {\"type\":\"integer\"},",
+											"                                \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+											"                                \"uniqueOnDemandUsersCount\": {\"type\":\"integer\"},",
+											"",
+											"                            },",
+											"                    },",
+											"                    \"detailsByEventType\":{\"type\":\"object\",",
+											"                            properties:{",
+											"                                \"virtualStageEvents\":{\"type\":\"object\",",
+											"                                    properties:{",
+											"                                    \"liveMinutes\": {\"type\":\"integer\"},",
+											"                                    \"onDemandMinutes\": {\"type\":\"integer\"},",
+											"                                    \"liveEventCount\": {\"type\":\"integer\"},",
+											"                                    \"onDemandEventCount\": {\"type\":\"integer\"},",
+											"                                    \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+											"                                    \"uniqueOnDemandUsersCount\": {\"type\":\"integer\"},",
+											"",
+											"                                },",
+											"                                },",
+											"                                \"networkingHubEvents\":{\"type\":\"object\",",
+											"                                    properties:{",
+											"                                    \"liveMinutes\": {\"type\":\"integer\"},",
+											"                                    \"liveEventCount\": {\"type\":\"integer\"},",
+											"                                    \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+											"                                    ",
+											"",
+											"                                },",
+											"                                },",
+											"                            },",
+											"                    },",
+											"                        ",
+											"                    },",
+											"            },",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/company/usage/{{companyId}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"usage",
+										"{{companyId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_lifetime usage for a company",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/company/usage/{{companyId}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"usage",
+										"{{companyId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_lifetime usage for a company",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/company/usage/{{companyId}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"usage",
+										"{{companyId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_lifetime usage for a company",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"",
+											"",
+											"pm.environment.set('errorMessage', pm.response.json().errorMessage);",
+											"",
+											"pm.test(\"errorMessage\", function () {",
+											"pm.expect(jsonData.errorMessage).to.eql(pm.environment.get(\"errorMessage\"));",
+											"});",
+											"pm.environment.unset(\"errorMessage\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/company/usage/{{invalid_companyId}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"usage",
+										"{{invalid_companyId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### The endpoint returns lifetime usage statistics for a specified company. A parent company will include all sub-company analytics as well.\n\n#### [https://docs.introvoke.com/reference/lifetime-usage-for-a-company](https://docs.introvoke.com/reference/lifetime-usage-for-a-company)"
+				},
+				{
+					"name": "date-range",
+					"item": [
+						{
+							"name": "usage for a company in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"company\":{\"type\":\"string\"},",
+											"            \"dateFrom\":{\"type\":\"string\"},",
+											"            \"dateTo\":{\"type\":\"string\"},",
+											"            \"dateRange\":{\"type\":\"object\",",
+											"                properties:{",
+											"                    \"summary\":{\"type\":\"object\",",
+											"                            properties:{",
+											"                                \"liveMinutes\": {\"type\":\"integer\"},",
+											"                                \"onDemandMinutes\": {\"type\":\"integer\"},",
+											"                                \"liveEventCount\": {\"type\":\"integer\"},",
+											"                                \"onDemandEventCount\": {\"type\":\"integer\"},",
+											"                                \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+											"                                \"uniqueOnDemandUsersCount\": {\"type\":\"integer\"},",
+											"",
+											"                            },",
+											"                    },",
+											"                    \"detailsByEventType\":{\"type\":\"object\",",
+											"                            properties:{",
+											"                                \"virtualStageEvents\":{\"type\":\"object\",",
+											"                                    properties:{",
+											"                                    \"liveMinutes\": {\"type\":\"integer\"},",
+											"                                    \"onDemandMinutes\": {\"type\":\"integer\"},",
+											"                                    \"liveEventCount\": {\"type\":\"integer\"},",
+											"                                    \"onDemandEventCount\": {\"type\":\"integer\"},",
+											"                                    \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+											"                                    \"uniqueOnDemandUsersCount\": {\"type\":\"integer\"},",
+											"",
+											"                                },",
+											"                                },",
+											"                                \"networkingHubEvents\":{\"type\":\"object\",",
+											"                                    properties:{",
+											"                                    \"liveMinutes\": {\"type\":\"integer\"},",
+											"                                    \"liveEventCount\": {\"type\":\"integer\"},",
+											"                                    \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+											"                                    ",
+											"",
+											"                                },",
+											"                                },",
+											"                            },",
+											"                    },",
+											"                        ",
+											"                    },",
+											"            },",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/company/usage/{{companyId}}/dates?start=2021-05-05T00:00:00.000Z&end=2022-10-27T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"usage",
+										"{{companyId}}",
+										"dates"
+									],
+									"query": [
+										{
+											"key": "start",
+											"value": "2021-05-05T00:00:00.000Z"
+										},
+										{
+											"key": "end",
+											"value": "2022-10-27T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_usage for a company in a date range Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"",
+											"",
+											"pm.environment.set('errorMessage', pm.response.json().errorMessage);",
+											"",
+											"pm.test(\"errorMessage\", function () {",
+											"pm.expect(jsonData.errorMessage).to.eql(pm.environment.get(\"errorMessage\"));",
+											"});",
+											"pm.environment.unset(\"errorMessage\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/company/usage/{{invalid_companyId}}/dates",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"usage",
+										"{{invalid_companyId}}",
+										"dates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_usage for a company in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/company/usage/{{companyId}}/dates",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"usage",
+										"{{companyId}}",
+										"dates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_usage for a company in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/company/usage/{{companyId}}/dates",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"company",
+										"usage",
+										"{{companyId}}",
+										"dates"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### The endpoint returns usage statistics for a specified company for the given start and end dates (both inclusive). If start or end dates are not provided they default to current server date (today).\n\n#### [https://docs.introvoke.com/reference/usage-for-a-company-in-a-date-range](https://docs.introvoke.com/reference/usage-for-a-company-in-a-date-range)"
+				},
+				{
+					"name": "daily-minutes",
+					"item": [
+						{
+							"name": "daily minutes in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyMinutes/{{companyId}}?startDate=2021-05-05T00:00:00.000Z&endDate=2022-05-05T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyMinutes",
+										"{{companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2021-05-05T00:00:00.000Z"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-05-05T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_daily minutes in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyMinutes/{{invalid_companyId}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyMinutes",
+										"{{invalid_companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2021-05-05T00:00:00.000Z",
+											"disabled": true
+										},
+										{
+											"key": "endDate",
+											"value": "2022-05-05T00:00:00.000Z",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_daily minutes in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyMinutes/{{invalid_companyId}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyMinutes",
+										"{{invalid_companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2021-05-05T00:00:00.000Z",
+											"disabled": true
+										},
+										{
+											"key": "endDate",
+											"value": "2022-05-05T00:00:00.000Z",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_daily minutes in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyMinutes/{{invalid_companyId}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyMinutes",
+										"{{invalid_companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2021-05-05T00:00:00.000Z",
+											"disabled": true
+										},
+										{
+											"key": "endDate",
+											"value": "2022-05-05T00:00:00.000Z",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### The endpoint returns usage statistics for a specified company for the given start and end dates (both inclusive). If start or end dates are not provided they default to current server date (today).\n\n#### [https://docs.introvoke.com/reference/daily-minutes-in-a-date-range](https://docs.introvoke.com/reference/daily-minutes-in-a-date-range)"
+				},
+				{
+					"name": "virtual stage usage by the day",
+					"item": [
+						{
+							"name": "virtual stage usage by the day in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            ",
+											"            \"event-live-minutes\":{\"type\":\"array\"},",
+											"            \"event-ondemand-minutes\":{\"type\":\"array\"},",
+											"            \"event-unique-users\":{\"type\":\"array\"},",
+											"            \"totalLiveMinutes\":{\"type\":\"integer\"},",
+											"            \"totalOndemandMinutes\":{\"type\":\"integer\"},",
+											"            \"totalUniqueUsers\":{\"type\":\"integer\"},",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyVirtualStageStats/{{companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-10-05T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyVirtualStageStats",
+										"{{companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-10-05T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_virtual stage usage by the day in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyVirtualStageStats/{{invalid_companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-10-05T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyVirtualStageStats",
+										"{{invalid_companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-10-05T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_virtual stage usage by the day in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyVirtualStageStats/{{invalid_companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-10-05T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyVirtualStageStats",
+										"{{invalid_companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-10-05T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_virtual stage usage by the day in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyVirtualStageStats/{{invalid_companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-10-05T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyVirtualStageStats",
+										"{{invalid_companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-10-05T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### The endpoint returns virtual stage usage (minutes and users) each day in a date range.\n\n#### [https://docs.introvoke.com/reference/daily-virtual-stage-usage-by-the-day](https://docs.introvoke.com/reference/daily-virtual-stage-usage-by-the-day)"
+				},
+				{
+					"name": "networking usage by the day",
+					"item": [
+						{
+							"name": "networking usage by the day in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            ",
+											"            \"networking-minutes\":{\"type\":\"array\"},",
+											"            \"networking-unique-users\":{\"type\":\"array\"},",
+											"            \"totalMinutesEngaged\":{\"type\":\"integer\"},",
+											"            \"totalUniqueUsers\":{\"type\":\"integer\"}",
+											"            ",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyNetworkingStats/{{companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-09-05T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyNetworkingStats",
+										"{{companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_networking usage by the day in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyNetworkingStats/{{invalid_companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-09-05T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyNetworkingStats",
+										"{{invalid_companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_networking usage by the day in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyNetworkingStats/{{companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-09-05T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyNetworkingStats",
+										"{{companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_networking usage by the day in a date range",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getCompanyDailyNetworkingStats/{{companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-09-05T00:00:00.000Z",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getCompanyDailyNetworkingStats",
+										"{{companyId}}"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										},
+										{
+											"key": "endDate",
+											"value": "2022-09-05T00:00:00.000Z"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### The endpoint returns networking usage (minutes and users) each day in a date range.\n\n#### [https://docs.introvoke.com/reference/networking-usage-by-the-day-in-a-date-range](https://docs.introvoke.com/reference/networking-usage-by-the-day-in-a-date-range)"
+				}
+			]
+		},
+		{
+			"name": "events",
+			"item": [
+				{
+					"name": "participant List",
+					"item": [
+						{
+							"name": "participant List with engaged minutes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"eventName\":{\"type\":\"string\"},",
+											"            \"eventId\":{\"type\":\"string\"},",
+											"            \"eventType\":{\"type\":\"string\"},",
+											"            \"company\":{\"type\":\"string\"},",
+											"            \"companyId\":{\"type\":\"string\" },",
+											"            \"startDate\":{\"type\": \"null\" || \"string\" },",
+											"            \"endDate\":{\"type\":\"string\"},",
+											"            \"limit\":{\"type\":\"integer\"},",
+											"            \"numberOfUsers\":{\"type\":\"integer\"},",
+											"            \"totalEngagedMinutes\":{\"type\":\"integer\"},",
+											"            \"averageEngagedMinutesByUser\":{\"type\":\"number\" },",
+											"            \"topParticipants\":{\"type\":\"array\",",
+											"                properties:{",
+											"                        \"name\": {\"type\":\"string\"},",
+											"                        \"userEmail\": {\"type\":\"string\"},",
+											"                        \"engagedMinutes\": {\"type\":\"integer\"}",
+											"                        ",
+											"                        ",
+											"                    },",
+											"            },",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/events/{{eventID}}/top-participants?engagementType=dfvfbla%$%23",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"events",
+										"{{eventID}}",
+										"top-participants"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2022-09-02",
+											"disabled": true
+										},
+										{
+											"key": "endDate",
+											"value": "2022-10-02",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "10",
+											"disabled": true
+										},
+										{
+											"key": "engagementType",
+											"value": "dfvfbla%$#"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid eventId_participant List with engaged minutes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"",
+											"",
+											"pm.environment.set('errorMessage', pm.response.json().errorMessage);",
+											"",
+											"pm.test(\"errorMessage\", function () {",
+											"pm.expect(jsonData.errorMessage).to.eql(pm.environment.get(\"errorMessage\"));",
+											"});",
+											"pm.environment.unset(\"errorMessage\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/events/{{invalid_eventId}}/top-participants",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"events",
+										"{{invalid_eventId}}",
+										"top-participants"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_participant List with engaged minutes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/events/{{invalid_eventId}}/top-participants",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"events",
+										"{{invalid_eventId}}",
+										"top-participants"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_participant List with engaged minutes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/user-engagement/events/{{invalid_eventId}}/top-participants",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"user-engagement",
+										"events",
+										"{{invalid_eventId}}",
+										"top-participants"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### The endpoint returns list of names, e-mail address and engaged minutes of the top participants and additional statistics, such as total number of users and average engaged minutes for the specified event within a date range (if specified).\n\n#### You can return the total engagement for live and onDemand minutes or specify which engagement type you want to return by adding `engagementType` as `live` or `onDemand`. You can find the charts used by this endpoint in the Event -> Analytics tab in your Sequel dashboard.\n\n#### [https://docs.introvoke.com/reference/participant-list-with-engaged-minutes-by-event](https://docs.introvoke.com/reference/participant-list-with-engaged-minutes-by-event)"
+				},
+				{
+					"name": "live video",
+					"item": [
+						{
+							"name": "live video watched over time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"VideoViews\":{\"type\":\"array\"}           ",
+											"                    ",
+											"            ",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getVideoWatchOverTime/{{eventID}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getVideoWatchOverTime",
+										"{{eventID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid eventID_live video watched over time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getVideoWatchOverTime/{{invalid_eventId}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getVideoWatchOverTime",
+										"{{invalid_eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_live video watched over time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getVideoWatchOverTime/{{eventID}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getVideoWatchOverTime",
+										"{{eventID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_live video watched over time",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/getVideoWatchOverTime/{{eventID}}",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"getVideoWatchOverTime",
+										"{{eventID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### The endpoint returns peak concurrent users for each minute during a live event.\n\n#### [https://docs.introvoke.com/reference/live-video-watched-over-time](https://docs.introvoke.com/reference/live-video-watched-over-time)"
+				},
+				{
+					"name": "poll results",
+					"item": [
+						{
+							"name": "get poll results",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"eventId\":{\"type\":\"string\"},",
+											"            \"eventName\":{\"type\":\"string\"},",
+											"            \"polls\":{\"type\":\"array\",",
+											"                properties:{",
+											"                        \"question\": {\"type\":\"string\"},",
+											"                        \"responses\":{\"type\":\"array\",",
+											"                            properties:{",
+											"                              \"text\": {\"type\":\"string\"},",
+											"                              \"users\": {\"type\":\"array\"}",
+											"                        ",
+											"                        ",
+											"                        ",
+											"                    },",
+											"            },",
+											"                        ",
+											"                        ",
+											"                        ",
+											"                    },",
+											"            },",
+											"",
+											"                  ",
+											"            ",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/polls",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{eventID}}",
+										"polls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid eventId_get poll results",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"",
+											"",
+											"pm.environment.set('errorMessage', pm.response.json().errorMessage);",
+											"",
+											"pm.test(\"errorMessage\", function () {",
+											"pm.expect(jsonData.errorMessage).to.eql(pm.environment.get(\"errorMessage\"));",
+											"});",
+											"pm.environment.unset(\"errorMessage\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{invalid_eventId}}/polls",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{invalid_eventId}}",
+										"polls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_get poll results",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/polls",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{eventID}}",
+										"polls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_get poll results",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/polls",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{eventID}}",
+										"polls"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### This endpoint returns all the polls that were run during this event including responses and their user information.\n\n#### [https://docs.introvoke.com/reference/eventseventidpolls](https://docs.introvoke.com/reference/eventseventidpolls)"
+				},
+				{
+					"name": "Q&A results",
+					"item": [
+						{
+							"name": "get Q&A results",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"eventId\":{\"type\":\"string\"},",
+											"            \"eventName\":{\"type\":\"string\"},",
+											"            \"questions\":{\"type\":\"array\",",
+											"                properties:{",
+											"                        \"question\": {\"type\":\"string\"},",
+											"                        \"upvotes\": {\"type\":\"integer\"},",
+											"                        \"askedBy\": {\"type\":\"string\"},",
+											"                        \"email\": {\"type\":\"string\"},",
+											"                        \"answer\": {\"type\":\"string\"},",
+											"                        \"votedBy\":{\"type\":\"array\",",
+											"                            properties:{",
+											"                              \"name\": {\"type\":\"string\"},",
+											"                              \"userId\": {\"type\":\"string\"},",
+											"                              \"userEmail\": {\"type\":\"string\"}",
+											"                        ",
+											"                        ",
+											"                        ",
+											"                    },",
+											"            },",
+											"                        ",
+											"                        ",
+											"                        ",
+											"                    },",
+											"            },",
+											"",
+											"                  ",
+											"            ",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/questions",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{eventID}}",
+										"questions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid eventid_get Q&A results",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"",
+											"",
+											"pm.environment.set('errorMessage', pm.response.json().errorMessage);",
+											"",
+											"pm.test(\"errorMessage\", function () {",
+											"pm.expect(jsonData.errorMessage).to.eql(pm.environment.get(\"errorMessage\"));",
+											"});",
+											"pm.environment.unset(\"errorMessage\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{invalid_eventId}}/questions",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{invalid_eventId}}",
+										"questions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_get Q&A results",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/questions",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{eventID}}",
+										"questions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_get Q&A results",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/questions",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{eventID}}",
+										"questions"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### This endpoint returns the Q&A results including who asked the questions and who upvoted them.\n\n#### [https://docs.introvoke.com/reference/get-event-qa-results](https://docs.introvoke.com/reference/get-event-qa-results)"
+				},
+				{
+					"name": "chat transcripts",
+					"item": [
+						{
+							"name": "get chat transcripts",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 OK\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"eventId\":{\"type\":\"string\"},",
+											"            \"eventName\":{\"type\":\"string\"},",
+											"            \"chatMessages\":{\"type\":\"array\",",
+											"                properties:{",
+											"                        \"message\": {\"type\":\"string\"},",
+											"                        \"timeElapsed\": {\"type\":\"string\"},",
+											"                        \"dateTime\": {\"type\":\"string\"},",
+											"                        \"name\": {\"type\":\"string\"},",
+											"                        \"email\": {\"type\":\"string\"},",
+											"                        ",
+											"                    },",
+											"            },",
+											"",
+											"                  ",
+											"            ",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/chat-transcript",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{eventID}}",
+										"chat-transcript"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "invalid eventId_get chat transcripts",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"",
+											"",
+											"pm.environment.set('errorMessage', pm.response.json().errorMessage);",
+											"",
+											"pm.test(\"errorMessage\", function () {",
+											"pm.expect(jsonData.errorMessage).to.eql(pm.environment.get(\"errorMessage\"));",
+											"});",
+											"pm.environment.unset(\"errorMessage\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{invalid_eventId}}/chat-transcript",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{invalid_eventId}}",
+										"chat-transcript"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "without token_get chat transcripts",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/chat-transcript",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{eventID}}",
+										"chat-transcript"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_get chat transcripts",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{wrong_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/chat-transcript",
+									"host": [
+										"{{url-analytics}}"
+									],
+									"path": [
+										"api",
+										"analytics",
+										"events",
+										"{{eventID}}",
+										"chat-transcript"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "#### Get chat transcripts\n\n#### [https://docs.introvoke.com/reference/get-chat-transcripts](https://docs.introvoke.com/reference/get-chat-transcripts)"
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,1606 @@
+{
+	"info": {
+		"_postman_id": "dc65e234-7cc3-44a7-a2f7-4fc621930a8a",
+		"name": "WebHooks",
+		"description": "### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23129003"
+	},
+	"item": [
+		{
+			"name": "registering a webhook",
+			"item": [
+				{
+					"name": "Fetch auth token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"jwt_access_token\", jsonData.access_token);",
+									"",
+									" function parseJwt (token,part) {",
+									"   var base64Url = token.split('.')[part];",
+									"   var words = CryptoJS.enc.Base64.parse(base64Url);",
+									"   var jsonPayload = CryptoJS.enc.Utf8.stringify(words);",
+									"   return  JSON.parse(jsonPayload);",
+									"};",
+									"",
+									"var jwtInfo ={};",
+									"jwtInfo.size = jsonData.access_token.length;",
+									"jwtInfo.header = parseJwt(jsonData.access_token,0);",
+									"jwtInfo.payload = parseJwt(jsonData.access_token,1);",
+									"jwtInfo.signature = jsonData.access_token.split('.')[2];",
+									"jwtInfo.expires = ((jwtInfo.payload.exp-Date.now().valueOf()/1000)/60).toFixed(1);",
+									"console.log(jwtInfo);",
+									"",
+									"var template = `",
+									"<b>JWT  Size:{{response.size}}Bytes. Expires in {{response.expires}} minutes</b><br>",
+									"<b>Header </b>",
+									"    <table>",
+									"        <tr><th>Property</th><th>Value</th></tr>",
+									"        {{#each response.header}}",
+									"            <tr><td>{{@key}}</td><td>{{.}}</td></tr>",
+									"        {{/each}}",
+									"    </table>",
+									"<b>Payload</b>",
+									"    <table>",
+									"        <tr><th>Property</th><th>Value</th></tr>",
+									"        {{#each response.payload}}",
+									"            <tr><td>{{@key}}</td><td>{{.}}</td></tr>",
+									"        {{/each}}",
+									"    </table>",
+									" <b>Claims</b>",
+									"    <table bgcolor=\"#FFFFFF\">",
+									"        <tr><th>Claim</th><th>Value</th></tr>",
+									"        {{#each response.payload.Claims}}",
+									"            <tr>",
+									"                {{#each this}}",
+									"                    <td>{{.}}</td>       ",
+									"                {{/each}}",
+									"            </tr>",
+									"        {{/each}}",
+									"    </table>",
+									"  <i>signature:{{response.signature}}</i>",
+									"`;",
+									"pm.visualizer.set(template, {response: jwtInfo});",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"let [header, payload, signature] = jsonData.access_token.split('.');",
+									"",
+									"function decode(x) {",
+									"    let wordArray = CryptoJS.enc.Base64.parse(x);",
+									"    let str = CryptoJS.enc.Utf8.stringify(wordArray);",
+									"    return JSON.parse(str);",
+									"}",
+									"",
+									"console.log(\"Header: \", decode(header));",
+									"console.log(\"Payload: \", decode(payload));",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"token_type: Bearer\", function () {",
+									"pm.expect(jsonData.token_type).to.eql(\"Bearer\");",
+									"});",
+									"pm.test(\"expires_in: 86400 seconds\", function () {",
+									"pm.expect(jsonData.expires_in).to.eql(86400);",
+									"});",
+									"",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"access_token\":{\"type\":\"string\"},",
+									"            \"token_type\":{\"type\":\"string\"},",
+									"            \"expires_in\":{\"type\":\"integer\"}",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": \"{{client_id}}\",\n    \"client_secret\": \"{{client_secret}}\",\n    \"audience\": \"{{audience}}\",\n    \"grant_type\": \"{{grant_type}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/oauth/token",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "registering_virtual-stage-event-started",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.environment.set('subscriptionId', pm.response.json().subscriptionId);",
+									"pm.environment.set('clientSecret', pm.response.json().clientSecret);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"eventType: virtual-stage-event-started\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"virtual-stage-event-started\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "registering_virtual-stage-event-ended",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//pm.environment.set('subscriptionId', pm.response.json().subscriptionId);",
+									"//pm.environment.set('clientSecret', pm.response.json().clientSecret);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"eventType: virtual-stage-event-ended\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"virtual-stage-event-ended\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-ended\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "registering_new-attendee-pre-registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//pm.environment.set('subscriptionId', pm.response.json().subscriptionId);",
+									"//pm.environment.set('clientSecret', pm.response.json().clientSecret);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"eventType: new-attendee-pre-registration\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"new-attendee-pre-registration\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"new-attendee-pre-registration\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "invalid eventType_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to create subscription\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to create subscription.\");",
+									"});",
+									"",
+									"pm.test(\"validationErrors: eventType - must be equal to one of the allowed values\", function () {",
+									"    pm.expect(jsonData.validationErrors[0]).to.eql(\"/eventType - must be equal to one of the allowed values\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"hsdbjshbv923842\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "subscription outofrange>365_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to create subscription\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to create subscription.\");",
+									"});",
+									"",
+									"pm.test(\"validationErrors: subscriptionLengthInDays - must be <= 365\", function () {",
+									"    pm.expect(jsonData.validationErrors[0]).to.eql(\"/subscriptionInfo/subscriptionLengthInDays - must be <= 365\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 500\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "subscription outofrange<2_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to create subscription\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to create subscription.\");",
+									"});",
+									"",
+									"pm.test(\"validationErrors: subscriptionLengthInDays - must be >= 2\", function () {",
+									"    pm.expect(jsonData.validationErrors[0]).to.eql(\"/subscriptionInfo/subscriptionLengthInDays - must be >= 2\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 1\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "invalid companyId_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to create subscription\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to create subscription.\");",
+									"});",
+									"",
+									"pm.test(\"message: Unable to find company with id: jafshtw564253£@^7thaMoXcgV\", function () {",
+									"    pm.expect(jsonData.validationErrors[0].message).to.eql(\"Unable to find company with id: jafshtw564253£@^7thaMoXcgV\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{invalid_companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "without token_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: No token found in the request\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Invalid token\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{wrong_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks)"
+		},
+		{
+			"name": "retrieving webhook",
+			"item": [
+				{
+					"name": "retrieve webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"subscriptionId\", function () {",
+									"    pm.expect(jsonData.subscriptionId).to.eql(pm.environment.get(\"subscriptionId\"))",
+									"});",
+									"pm.test(\"eventType: virtual-stage-event-started\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"virtual-stage-event-started\")",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "invalid subscriptionId_retrieve webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to find subscription.\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to find subscription.\")",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{invalid_subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{invalid_subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "without token_retrieve webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: No token found in the request\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_retrieve webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Invalid token\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{wrong_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks)"
+		},
+		{
+			"name": "editing webhook",
+			"item": [
+				{
+					"name": "edit webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n\"extendSubscriptionByDays\": 55\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "invalid subscriptionId_edit webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n\"extendSubscriptionByDays\": 55\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{invalid_subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{invalid_subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "without token_edit webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_edit webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{wrong_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks)"
+		},
+		{
+			"name": "renewing webhook",
+			"item": [
+				{
+					"name": "renew webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"subscriptionLengthInDays\": 100\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/renew/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"renew",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "invalid subscriptionId_renew webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"subscriptionLengthInDays\": 100\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/renew/{{invalid_subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"renew",
+								"{{invalid_subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "without token_renew webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/renew/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"renew",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_renew webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{wrong_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/renew/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"renew",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks)"
+		},
+		{
+			"name": "unregistering webhook",
+			"item": [
+				{
+					"name": "unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "same subscriptionId_unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to find subscription.\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to find subscription.\")",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve deleted webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to find subscription.\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to find subscription.\")",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "invalid subscriptionId_unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n\"extendSubscriptionByDays\": 55\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{invalid_subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{invalid_subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "without token_unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{wrong_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks)"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

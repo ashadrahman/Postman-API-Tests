@@ -1,0 +1,5044 @@
+{
+	"info": {
+		"_postman_id": "0fd455d4-e149-4945-8e4f-bd4da583f3e6",
+		"name": "Daily_Run",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23129003"
+	},
+	"item": [
+		{
+			"name": "Daily Run_OEM",
+			"item": [
+				{
+					"name": "fetch auth token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"jwt_access_token\", jsonData.access_token);",
+									"",
+									" function parseJwt (token,part) {",
+									"   var base64Url = token.split('.')[part];",
+									"   var words = CryptoJS.enc.Base64.parse(base64Url);",
+									"   var jsonPayload = CryptoJS.enc.Utf8.stringify(words);",
+									"   return  JSON.parse(jsonPayload);",
+									"};",
+									"",
+									"var jwtInfo ={};",
+									"jwtInfo.size = jsonData.access_token.length;",
+									"jwtInfo.header = parseJwt(jsonData.access_token,0);",
+									"jwtInfo.payload = parseJwt(jsonData.access_token,1);",
+									"jwtInfo.signature = jsonData.access_token.split('.')[2];",
+									"jwtInfo.expires = ((jwtInfo.payload.exp-Date.now().valueOf()/1000)/60).toFixed(1);",
+									"console.log(jwtInfo);",
+									"",
+									"var template = `",
+									"<b>JWT  Size:{{response.size}}Bytes. Expires in {{response.expires}} minutes</b><br>",
+									"<b>Header </b>",
+									"    <table>",
+									"        <tr><th>Property</th><th>Value</th></tr>",
+									"        {{#each response.header}}",
+									"            <tr><td>{{@key}}</td><td>{{.}}</td></tr>",
+									"        {{/each}}",
+									"    </table>",
+									"<b>Payload</b>",
+									"    <table>",
+									"        <tr><th>Property</th><th>Value</th></tr>",
+									"        {{#each response.payload}}",
+									"            <tr><td>{{@key}}</td><td>{{.}}</td></tr>",
+									"        {{/each}}",
+									"    </table>",
+									" <b>Claims</b>",
+									"    <table bgcolor=\"#FFFFFF\">",
+									"        <tr><th>Claim</th><th>Value</th></tr>",
+									"        {{#each response.payload.Claims}}",
+									"            <tr>",
+									"                {{#each this}}",
+									"                    <td>{{.}}</td>       ",
+									"                {{/each}}",
+									"            </tr>",
+									"        {{/each}}",
+									"    </table>",
+									"  <i>signature:{{response.signature}}</i>",
+									"`;",
+									"pm.visualizer.set(template, {response: jwtInfo});",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"let [header, payload, signature] = jsonData.access_token.split('.');",
+									"",
+									"function decode(x) {",
+									"    let wordArray = CryptoJS.enc.Base64.parse(x);",
+									"    let str = CryptoJS.enc.Utf8.stringify(wordArray);",
+									"    return JSON.parse(str);",
+									"}",
+									"",
+									"console.log(\"Header: \", decode(header));",
+									"console.log(\"Payload: \", decode(payload));",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"token_type: Bearer\", function () {",
+									"pm.expect(jsonData.token_type).to.eql(\"Bearer\");",
+									"});",
+									"pm.test(\"expires_in: 86400 seconds\", function () {",
+									"pm.expect(jsonData.expires_in).to.eql(86400);",
+									"});",
+									"",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"access_token\":{\"type\":\"string\"},",
+									"            \"token_type\":{\"type\":\"string\"},",
+									"            \"expires_in\":{\"type\":\"integer\"}",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": \"{{client_id}}\",\n    \"client_secret\": \"{{client_secret}}\",\n    \"audience\": \"{{audience}}\",\n    \"grant_type\": \"{{grant_type}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/oauth/token",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"oauth",
+								"token"
+							]
+						},
+						"description": "#### Our APIs are protected using JWT access tokens, so the first step is to fetch an auth token using the following details in the link below.\n\n#### [https://docs.introvoke.com/docs/getting-started](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "find company by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"logo\":{\"type\":\"string\"},",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"eventIds\":{\"type\":\"array\"},",
+									"            \"parentCompanyId\":{\"type\":\"null\" || \"string\" },",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/company/{{companyId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"company",
+								"{{companyId}}"
+							]
+						},
+						"description": "#### Returns a single company.\n\n#### [https://docs.introvoke.com/reference/getcompanybyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "companies under parent company",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"parentCompanyId\", function () {",
+									"pm.expect(jsonData[0].parentCompanyId).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"array\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"logo\":{\"type\":\"string\"},",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"eventIds\":{\"type\":\"array\"},",
+									"            \"metadata\":{\"type\":\"null\" || \"object\"},",
+									"            \"parentCompanyId\":{\"type\":\"null\" || \"string\" },",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/company/{{companyId}}/list",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"company",
+								"{{companyId}}",
+								"list"
+							]
+						},
+						"description": "#### List all companies under a parent company\n\n#### [https://docs.introvoke.com/reference/listchildcompanies](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "events under parent company",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"array\",",
+									"        properties:{",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"picture\":{\"type\":\"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"timezone\":{\"type\":\"string\"},",
+									"            \"networkingHub\":{\"type\":\"object\",",
+									"                properties:{",
+									"                        \"id\": {\"type\":\"string\"},",
+									"                        \"name\": {\"type\":\"string\"}",
+									"                    },",
+									"            },",
+									"            \"company\":{\"type\":\"object\",",
+									"                properties:{",
+									"                        \"id\": {\"type\":\"string\"},",
+									"                        \"name\": {\"type\":\"string\"},",
+									"                        \"logo\": {\"type\":\"string\"}",
+									"                    },",
+									"            },",
+									"            \"isEventLive\":{\"type\":\"boolean\"},",
+									"            \"isReplayEnabled\":{\"type\":\"boolean\"}",
+									"                    ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/company/{{companyId}}/events",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"company",
+								"{{companyId}}",
+								"events"
+							]
+						},
+						"description": "#### List all events under a parent company\n\n#### [https://docs.introvoke.com/reference/listcompanyevents](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "create child company",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.environment.set('childcompany_id', pm.response.json().uid);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name\", function () {",
+									"pm.expect(jsonData.name).to.eql(pm.environment.get(\"childCompany_name\"));",
+									"});",
+									"pm.test(\"childcompany_id: uid\", function () {",
+									"pm.expect(jsonData.uid).to.eql(pm.environment.get(\"childcompany_id\"));",
+									"});",
+									"pm.test(\"parentCompanyId\", function () {",
+									"pm.expect(jsonData.parentCompanyId).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"logo\":{\"type\":\"string\"},",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"eventIds\":{\"type\":\"array\"},",
+									"            \"metadata\":{\"type\": \"object\"},",
+									"            \"parentCompanyId\":{\"type\":\"string\"},",
+									"            ",
+									"        }}",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{childCompany_name}}\",\n    \"logo\": \"\",\n    \"metadata\": {\n        \"companyMetaData\": {\n            \"colour\": \"red\",\n            \"temperature\": \"100\",\n            \"region\": \"US\"\n            \n        }\n    \n    }\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/company/{{companyId}}/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"company",
+								"{{companyId}}",
+								"create"
+							]
+						},
+						"description": "#### Create a new company under a parent company\n\n#### [https://docs.introvoke.com/reference/addcompanytoparent](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "update company with json data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Testing name change\");",
+									"});",
+									"pm.test(\"uid\", function () {",
+									"pm.expect(jsonData.uid).to.eql(pm.environment.get(\"childcompany_id\"));",
+									"});",
+									"pm.test(\"parentCompanyId\", function () {",
+									"pm.expect(jsonData.parentCompanyId).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"logo\":{\"type\":\"string\"},",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"eventIds\":{\"type\":\"array\"},",
+									"            \"parentCompanyId\":{\"type\":\"string\"},",
+									"            \"metadata\":{\"type\":\"object\",",
+									"                properties:{",
+									"                        ",
+									"                        \"companyMetaData\":{\"type\":\"object\",",
+									"                            properties:{",
+									"                              \"colour\": {\"type\":\"string\"},",
+									"                              \"temperature\": {\"type\":\"string\"},",
+									"                              \"region\": {\"type\":\"string\"}",
+									"                        ",
+									"                        ",
+									"                        ",
+									"                    },",
+									"            },",
+									"                        ",
+									"                        ",
+									"                        ",
+									"                    },",
+									"            },",
+									"            ",
+									"",
+									"                  ",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Testing name change\",\n    \"logo\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/company/{{childcompany_id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"company",
+								"{{childcompany_id}}"
+							]
+						},
+						"description": "#### Update metadata for the company\n\n#### [https://docs.introvoke.com/reference/updatecompanymetadata](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "create new event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.environment.set('eventId', pm.response.json().uid);",
+									"",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"companyUid\", function () {",
+									"pm.expect(jsonData.companyUid).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"",
+									"pm.test(\"startDate\", function () {",
+									"pm.expect(jsonData.startDate).to.eql(pm.environment.get(\"event_startDate\"));",
+									"});",
+									"",
+									"pm.test(\"endDate\", function () {",
+									"pm.expect(jsonData.endDate).to.eql(pm.environment.get(\"event_endDate\"));",
+									"});",
+									"",
+									"pm.test(\"name\", function () {",
+									"pm.expect(jsonData.name).to.eql(pm.environment.get(\"event_name\"));",
+									"});",
+									"",
+									"pm.test(\"timezone\", function () {",
+									"pm.expect(jsonData.timezone).to.eql(pm.environment.get(\"event_timezone\"));",
+									"});",
+									"",
+									"pm.test(\"type\", function () {",
+									"pm.expect(jsonData.type).to.eql(pm.environment.get(\"event_type\"));",
+									"});",
+									"",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"companyUid\":{\"type\":\"string\"},",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"timezone\":{\"type\":\"string\"},",
+									"            \"type\":{\"type\":\"string\"},",
+									"            \"eventInfo\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"privateEventInfo\":{\"type\": \"object\",",
+									"                    properties:{",
+									"                        \"attendeePasscode\": {\"type\":\"string\"},",
+									"                        \"presenterPasscode\": {\"type\":\"string\"},",
+									"                        \"hostPasscode\": {\"type\":\"string\"},",
+									"                        \"rtmpKey\": {\"type\":\"string\"},",
+									"                        \"rtmpUrl\": {\"type\":\"string\"}",
+									"",
+									"                    }",
+									"                }",
+									"            },",
+									"            ",
+									"        }",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyId\": \"{{companyId}}\",\n    \"name\": \"{{event_name}}\",\n    \"startDate\": \"{{event_startDate}}\",\n    \"endDate\": \"{{event_endDate}}\",\n    \"timezone\": \"{{event_timezone}}\",\n    \"type\": \"{{event_type}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"create"
+							]
+						},
+						"description": "#### Create a new event\n\n#### [https://docs.introvoke.com/reference/addevent](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "find event by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"uid:eventId\", function () {",
+									"pm.expect(jsonData.uid).to.eql(pm.environment.get(\"eventId\"));",
+									"});",
+									"pm.test(\"companyUid\", function () {",
+									"pm.expect(jsonData.companyUid).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"pm.test(\"name\", function () {",
+									"pm.expect(jsonData.name).to.eql(pm.environment.get(\"event_name\"));",
+									"});",
+									"pm.test(\"picture\", function () {",
+									"pm.expect(jsonData.picture).to.eql(null);",
+									"});",
+									"pm.test(\"startDate\", function () {",
+									"pm.expect(jsonData.startDate).to.eql(pm.environment.get(\"event_startDate\"));",
+									"});",
+									"pm.test(\"endDate\", function () {",
+									"pm.expect(jsonData.endDate).to.eql(pm.environment.get(\"event_endDate\"));",
+									"});",
+									"pm.test(\"timezone\", function () {",
+									"pm.expect(jsonData.timezone).to.eql(pm.environment.get(\"event_timezone\"));",
+									"});",
+									"pm.test(\"type\", function () {",
+									"pm.expect(jsonData.type).to.eql(pm.environment.get(\"event_type\"));",
+									"});",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"companyUid\":{\"type\":\"string\"},",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"picture\":{\"type\":\"null\" || \"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"timezone\":{\"type\":\"string\"},",
+									"            \"type\":{\"type\":\"string\"},",
+									"            \"presenters\":{\"type\":\"null\" || \"array\"},",
+									"            \"organizers\":{\"type\":\"null\" || \"array\"},",
+									"            \"networkingHub\":{\"type\":\"null\" || \"string\"},",
+									"            \"eventInfo\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"privateEventInfo\":{\"type\": \"object\",",
+									"                    properties:{",
+									"                        \"attendeePasscode\": {\"type\":\"string\"},",
+									"                        \"presenterPasscode\": {\"type\":\"string\"},",
+									"                        \"hostPasscode\": {\"type\":\"string\"},",
+									"                        \"rtmpKey\": {\"type\":\"string\"},",
+									"                        \"rtmpUrl\": {\"type\":\"string\"}",
+									"",
+									"                    }",
+									"                }",
+									"                ",
+									"            },",
+									"            \"autoSelectLatestReplay\":{\"type\":\"null\" || \"boolean\"},",
+									"            \"isAttendeeRegistrationModeEnabled\":{\"type\":\"null\" || \"boolean\"},",
+									"            \"isPresenterRegistrationModeEnabled\":{\"type\":\"null\" || \"boolean\"},",
+									"            \"isRegistrationModeEnabled\":{\"type\":\"null\" || \"boolean\"},",
+									"            \"registration\":{\"type\":\"null\" || \"boolean\"},",
+									"            \"showInDemo\":{\"type\":\"null\" || \"boolean\"},",
+									"            \"disableEventRecording\":{\"type\":\"null\" || \"boolean\"}",
+									"            ",
+									"        }",
+									"        ",
+									"    }",
+									"    ",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}"
+							]
+						},
+						"description": "#### Find event by ID\n\n#### [https://docs.introvoke.com/reference/geteventbyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return embedCode",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.environment.set('embedCode', pm.response.json());",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"embedCode\", function () {",
+									"pm.expect(jsonData).to.eql(pm.environment.get(\"embedCode\"));",
+									"});",
+									"",
+									"pm.environment.unset(\"embedCode\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"test1234\",\n    \"userDisplayName\": \"Test\",\n    \"userEmail\": \"testksbdj326724\",\n    \"userAvatar\": \"kdciiwebrbu\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}/embedCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}",
+								"embedCode"
+							]
+						},
+						"description": "#### Return the embed code for the event component\n\n#### [https://docs.introvoke.com/reference/getembedeventbyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "register user for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"email\", function () {",
+									"pm.expect(jsonData.email).to.eql(pm.environment.get(\"user_email\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{user_name}}\",\n    \"email\": \"{{user_email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}/registrant",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}",
+								"registrant"
+							]
+						},
+						"description": "#### Register a user for the event. (Adds a new registered user to the event.)\n\n#### [https://docs.introvoke.com/reference/post_event-eventid-registrant](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return all users list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name\", function () {",
+									"pm.expect(jsonData[0].name).to.eql(pm.environment.get(\"user_name\"));",
+									"});",
+									"pm.test(\"email\", function () {",
+									"pm.expect(jsonData[0].email).to.eql(pm.environment.get(\"user_email\"));",
+									"});",
+									"",
+									"pm.environment.set(\"join_url\", jsonData[0].join_url)",
+									"",
+									"pm.test(\"join_url\", function () {",
+									"pm.expect(jsonData[0].join_url).to.eql(pm.environment.get(\"join_url\"));",
+									"});",
+									"",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"array\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"email\":{\"type\":\"string\"},",
+									"            \"join_url\":{\"type\":\"string\"},",
+									"            \"metadata\":{\"type\":\"object\"},     ",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}/registrants",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}",
+								"registrants"
+							]
+						},
+						"description": "#### Return a list of all registered users. (Returns an array of registrants for the event.)\n\n#### [https://docs.introvoke.com/reference/get_event-eventid-registrants](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "add presenter",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"presenter id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData[0]).to.eql(pm.environment.get(\"presenter_id\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"presenter\": \"{{presenter_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}/presenter",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}",
+								"presenter"
+							]
+						},
+						"description": "#### Add a presenter id to the event. (Returns the updated list of presenters.)\n\n#### [https://docs.introvoke.com/reference/putpresenterbyid](https://docs.introvoke.com/reference/putpresenterbyid)"
+					},
+					"response": []
+				},
+				{
+					"name": "add organizer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"organizer id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData[0]).to.eql(pm.environment.get(\"organizer_id\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"organizer\": \"{{organizer_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}/organizer",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}",
+								"organizer"
+							]
+						},
+						"description": "#### Add an organizer id to the event. (Returns the updated list of organizers.)\n\n#### [https://docs.introvoke.com/reference/puthostbyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "delete presenterId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}/presenter/{{presenter_id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}",
+								"presenter",
+								"{{presenter_id}}"
+							]
+						},
+						"description": "#### Delete a presenter id from the event.\n\n#### [https://docs.introvoke.com/reference/deletepresenterbyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "delete organizerId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}/organizer/{{organizer_id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}",
+								"organizer",
+								"{{organizer_id}}"
+							]
+						},
+						"description": "#### Delete an organizer id from the event.\n\n#### [https://docs.introvoke.com/reference/deletehostbyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return replay list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"array\",",
+									"        properties:{",
+									"            ",
+									"            \"creationDate\" :{\"type\":\"string\"},",
+									"            \"isCustomReplay\":{\"type\":\"boolean\"},",
+									"            \"url\":{\"type\":\"string\"}",
+									"                     ",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{replay_eventId}}/availableReplays",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{replay_eventId}}",
+								"availableReplays"
+							]
+						},
+						"description": "#### Return a list of replays for this event. (Returns an array of replays for this event.)\n\n#### [https://docs.introvoke.com/reference/get_event-eventid-availablereplays](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "update event with json data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"companyUid\":{\"type\":\"string\"},",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"timezone\":{\"type\":\"string\"},",
+									"            \"type\":{\"type\":\"string\"},",
+									"            \"eventInfo\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"privateEventInfo\":{\"type\": \"object\",",
+									"                    properties:{",
+									"                        \"attendeePasscode\": {\"type\":\"string\"},",
+									"                        \"presenterPasscode\": {\"type\":\"string\"},",
+									"                        \"hostPasscode\": {\"type\":\"string\"},",
+									"                        \"rtmpKey\": {\"type\":\"string\"},",
+									"                        \"rtmpUrl\": {\"type\":\"string\"}",
+									"",
+									"                    }",
+									"                }",
+									"            },",
+									"            ",
+									"        }",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"\",\n    \"startDate\": \"\",\n    \"endDate\": \"\",\n    \"timezone\": \"\",\n    \"type\": \"\",\n    \"picture\": \"\",\n    \"networkingHub\": \"\",\n    \"presenters\": \"\",\n    \"organizers\": \"\",\n    \"autoSelectLatestReplay\": \"\",\n    \"disableEventRecording\": \"\",\n    \"isRegistrationModeEnabled\": \"\",\n    \"isAttendeeRegistrationModeEnabled\": \"\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}"
+							]
+						},
+						"description": "#### Update an event with json data.\n\n#### [https://docs.introvoke.com/reference/updateeventwithjsondata](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "create clone event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.environment.set('clone_eventId', pm.response.json().uid);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"companyUid\", function () {",
+									"pm.expect(jsonData.companyUid).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"pm.test(\"name\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Create clone event\");",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"companyUid\":{\"type\":\"string\"},",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"timezone\":{\"type\":\"string\"},",
+									"            \"type\":{\"type\":\"string\"},",
+									"            \"eventInfo\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"privateEventInfo\":{\"type\": \"object\",",
+									"                    properties:{",
+									"                        \"attendeePasscode\": {\"type\":\"string\"},",
+									"                        \"presenterPasscode\": {\"type\":\"string\"},",
+									"                        \"hostPasscode\": {\"type\":\"string\"},",
+									"                        \"rtmpKey\": {\"type\":\"string\"},",
+									"                        \"rtmpUrl\": {\"type\":\"string\"}",
+									"",
+									"                    }",
+									"                }",
+									"            },",
+									"            ",
+									"        }",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Create clone event\",\n    \"startDate\": \"2022-12-15T00:00:00.000Z\",\n    \"endDate\": \"2023-12-15T00:00:00.000Z\",\n    \"timezone\": \"Europe/Lisbon\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}/clone",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}",
+								"clone"
+							]
+						},
+						"description": "#### Create a new event based on source event\n\n#### [https://docs.introvoke.com/reference/cloneevent](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "delete user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"Deleted OK\", function () {",
+									"pm.expect(jsonData).to.eql(\"OK\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"{{user_email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}/registrant",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}",
+								"registrant"
+							]
+						},
+						"description": "#### Delete a registered user from the event\n\n#### [https://docs.introvoke.com/reference/deleteregistrantbyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "delete event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/event/{{eventId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"{{eventId}}"
+							]
+						},
+						"description": "#### Delete an event\n\n#### [https://docs.introvoke.com/reference/deleteevent](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "create networking hub",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"friendlyName\", function () {",
+									"pm.expect(jsonData.friendlyName).to.eql(\"Test Networking Hub\");",
+									"});",
+									"pm.test(\"company\", function () {",
+									"pm.expect(jsonData.company).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"/*pm.test(\"organizers\", function () {",
+									"pm.expect(jsonData.organizers).to.eql(pm.environment.get(\"user_email\"));",
+									"}); */",
+									"pm.test(\"networkingHubRooms name\", function () {",
+									"pm.expect(jsonData.networkingHubRooms[0].name).to.eql(\"Food Lovers\");",
+									"});",
+									"pm.test(\"networkingHubRooms maxSlots\", function () {",
+									"pm.expect(jsonData.networkingHubRooms[0].maxSlots).to.eql(4);",
+									"});",
+									"",
+									"pm.test(\"whitelabel\", function () {",
+									"pm.expect(jsonData.whitelabel.hasLiveSupport).to.eql(true);",
+									"});",
+									"",
+									"pm.environment.set('networkingHub_id', pm.response.json().uid);",
+									"",
+									"pm.test(\"uid\", function () {",
+									"pm.expect(jsonData.uid).to.eql(pm.environment.get(\"networkingHub_id\"));",
+									"});",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"friendlyName\":{\"type\":\"string\"},",
+									"            \"company\":{\"type\":\"string\"},",
+									"            \"organizers\":{\"type\":\"array\"},",
+									"            \"networkingHubRooms\":{\"type\":\"array\",",
+									"              properties:{",
+									"                  \"name\":{\"type\": \"string\"},",
+									"                  \"maxSlots\":{\"type\": \"integer\"},",
+									"                  \"id\":{\"type\": \"string\"}",
+									"              },",
+									"            },",
+									"            \"whitelabel\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"hasLiveSupport\":{\"type\": \"boolean\"},     ",
+									"                            },",
+									"            \"uid\":{\"type\":\"string\"},",
+									"        }",
+									"        ",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"friendlyName\": \"Test Networking Hub\",\n    \"company\": \"{{companyId}}\",\n    \"organizers\": [\"abc@gmail.com\"],\n    \"networkingHubRooms\": [\n                            {   \n                                \"name\": \"Food Lovers\",\n                                \"maxSlots\": 4\n                             }\n                        ]\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/networking",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking"
+							]
+						},
+						"description": "#### Create a new networking hub\n\n#### [https://docs.introvoke.com/reference/addnetworkinghub](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "find networkingHub",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"friendlyName\":{\"type\":\"string\"},",
+									"            \"networkingHubRooms\":{\"type\":\"array\",",
+									"              properties:{",
+									"                  \"name\":{\"type\": \"string\"},",
+									"                  \"maxSlots\":{\"type\": \"integer\"},",
+									"                  \"id\":{\"type\": \"string\"},",
+									"              },},",
+									"            \"organizers\":{\"type\":\"array\"},",
+									"            \"hosts\":{\"type\":\"array\"},",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"company\":{\"type\":\"string\"},",
+									"            \"whitelabel\":{\"type\":\"object\",",
+									"                properties:{",
+									"                  \"hasLiveSupport\":{\"type\": \"boolean\"},",
+									"                  \"showPoweredBy\":{\"type\": \"boolean\"},",
+									"            },},",
+									"        ",
+									"        ",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingHub_id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingHub_id}}"
+							]
+						},
+						"description": "#### Find NetworkingHub by ID\n\n#### [https://docs.introvoke.com/reference/getnetworkinghubbyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "register user for networking hub",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"join_url\":{\"type\":\"string\"},",
+									"            \"joinCode\":{\"type\":\"string\"},",
+									"            \"authToken\":{\"type\":\"string\"},",
+									"            \"email\":{\"type\":\"string\"}",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test user\",\n    \"email\": \"test_user@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingHub_id}}/registrant",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingHub_id}}",
+								"registrant"
+							]
+						},
+						"description": "#### Register a user for the networking hub\n\n#### [https://docs.introvoke.com/reference/post_networking-id-registrant](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return list of participants",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingHub_id}}/participantsList",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingHub_id}}",
+								"participantsList"
+							]
+						},
+						"description": "#### Return a list of participants\n\n#### [https://docs.introvoke.com/reference/returnnetworkinghubparticipants](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "clear chat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingHub_id}}/clearChat",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingHub_id}}",
+								"clearChat"
+							]
+						},
+						"description": "#### Clear all networking hub chat channels with the option to clear individual circles\n\n#### [https://docs.introvoke.com/reference/postclearchat](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "set user profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"\",\n    \"userProfile\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingHub_id}}/setUserProfile",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingHub_id}}",
+								"setUserProfile"
+							]
+						},
+						"description": "#### Set a user profile\n\n#### [https://docs.introvoke.com/reference/setuserprofile](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "invite user to join conversation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"test1@gmail.com\",\n    \"invitedUserId\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingHub_id}}/inviteUser",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingHub_id}}",
+								"inviteUser"
+							]
+						},
+						"description": "#### Invite another user to join a conversation\n\n#### [https://docs.introvoke.com/reference/inviteuser](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return embed code",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"test\",\n    \"userDisplayName\": \"test\",\n    \"userEmail\": \"test2@gmail.com\",\n    \"userAvatar\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingHub_id}}/embedCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingHub_id}}",
+								"embedCode"
+							]
+						},
+						"description": "#### Return the embed code for the Networking hub component\n\n#### [https://docs.introvoke.com/reference/getembednetworkinghubbyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "update networking hub",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uid\": \"\",\n    \"friendlyName\": \"\",\n    \"company\": \"\",\n    \"organizers\": \"\",\n    \"networkingHubRooms\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingHub_id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingHub_id}}"
+							]
+						},
+						"description": "#### Update a NetworkingHub hub with json data\n\n#### [https://docs.introvoke.com/reference/updatenetworkinghub](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "get download URL for recording",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"downloadUrl\":{\"type\":\"string\"},",
+									"            \"expiresOn\":{\"type\":\"string\"}",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingId_circle_recording}}/circle/{{circleId}}/recording/{{recordingId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingId_circle_recording}}",
+								"circle",
+								"{{circleId}}",
+								"recording",
+								"{{recordingId}}"
+							]
+						},
+						"description": "#### Retrieves the download URL for the MP4 recording for the specified circle id and recording id. (Returns the download URL for the recording and expiration date/time for the URL.)\n\n#### [https://docs.introvoke.com/reference/getnetworkinghubcirclerecordingdownloadurl](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "delete user from networking hub",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test_user@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/networking/{{networkingHub_id}}/registrant",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"networking",
+								"{{networkingHub_id}}",
+								"registrant"
+							]
+						},
+						"description": "#### Delete a registered user from the networking hub\n\n#### [https://docs.introvoke.com/reference/deletehubregistrantbyid](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Daily Run_CustomizationAPI",
+			"item": [
+				{
+					"name": "return company customization theme for all events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name: Introvoke Platform Default Theme\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Sequel Platform Default Theme\");",
+									"});",
+									"",
+									"pm.test(\"defaultTheme: true\", function () {",
+									"pm.expect(jsonData.defaultTheme).to.eql(true);",
+									"});",
+									"",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"defaultTheme\":{\"type\":\"boolean\"},",
+									"            \"brandColors\":{\"type\":\"array\"},",
+									"            \"fonts\":{\"type\":\"array\",",
+									"                properties: {",
+									"                    \"isPrimary\": {\"type\":\"boolean\"},",
+									"                    \"fontName\": {\"type\":\"string\"},",
+									"                    \"fontUrl\": {\"type\":\"string\"}",
+									"",
+									"            }},",
+									"            \"virtualStage\":{\"type\":\"object\",",
+									"               \"background\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"watermark\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"countdown\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"                \"presenter\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"glowColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"             ",
+									"            },",
+									"",
+									"            \"networkingHub\":{\"type\":\"object\",",
+									"               \"circleGraphics\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"joinNetworking\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"returnToStage\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"             ",
+									"            },",
+									"",
+									"            \"warningNotices\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"buttonColor\": {\"type\":\"null\" || \"string\"}",
+									"                ",
+									"            }},",
+									"",
+									"            \"chat\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"},",
+									"                    \"colors\": {\"type\":\"null\" || \"string\"},",
+									"                    \"badge\": {\"type\":\"object\",",
+									"                             properties: {",
+									"                            \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                            \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                            \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}}},",
+									"",
+									"            \"participantList\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"qna\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"polls\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"privateMessages\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"poweredByIntrovokeLabel\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/companies/{{companyId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"companies",
+								"{{companyId}}",
+								"theme"
+							]
+						},
+						"description": "### **Returns the event customization theme for all events for the company based on the business rules.**\n\n### [**https://docs.introvoke.com/reference/get_v3-companies-companyid-theme**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "create new event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.environment.set('eventId', pm.response.json().uid);",
+									"",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"companyUid\", function () {",
+									"pm.expect(jsonData.companyUid).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"",
+									"pm.test(\"startDate\", function () {",
+									"pm.expect(jsonData.startDate).to.eql(pm.environment.get(\"event_startDate\"));",
+									"});",
+									"",
+									"pm.test(\"endDate\", function () {",
+									"pm.expect(jsonData.endDate).to.eql(pm.environment.get(\"event_endDate\"));",
+									"});",
+									"",
+									"pm.test(\"name\", function () {",
+									"pm.expect(jsonData.name).to.eql(pm.environment.get(\"event_name\"));",
+									"});",
+									"",
+									"pm.test(\"timezone\", function () {",
+									"pm.expect(jsonData.timezone).to.eql(pm.environment.get(\"event_timezone\"));",
+									"});",
+									"",
+									"pm.test(\"type\", function () {",
+									"pm.expect(jsonData.type).to.eql(pm.environment.get(\"event_type\"));",
+									"});",
+									"",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"companyUid\":{\"type\":\"string\"},",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"timezone\":{\"type\":\"string\"},",
+									"            \"type\":{\"type\":\"string\"},",
+									"            \"eventInfo\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"privateEventInfo\":{\"type\": \"object\",",
+									"                    properties:{",
+									"                        \"attendeePasscode\": {\"type\":\"string\"},",
+									"                        \"presenterPasscode\": {\"type\":\"string\"},",
+									"                        \"hostPasscode\": {\"type\":\"string\"},",
+									"                        \"rtmpKey\": {\"type\":\"string\"},",
+									"                        \"rtmpUrl\": {\"type\":\"string\"}",
+									"",
+									"                    }",
+									"                }",
+									"            },",
+									"            ",
+									"        }",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyId\": \"{{companyId}}\",\n    \"name\": \"{{event_name}}\",\n    \"startDate\": \"{{event_startDate}}\",\n    \"endDate\": \"{{event_endDate}}\",\n    \"timezone\": \"{{event_timezone}}\",\n    \"type\": \"{{event_type}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/event/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"event",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "return event customization theme for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name: Introvoke Platform Default Theme\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Sequel Platform Default Theme\");",
+									"});",
+									"",
+									"pm.test(\"defaultTheme: true\", function () {",
+									"pm.expect(jsonData.defaultTheme).to.eql(true);",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"defaultTheme\":{\"type\":\"boolean\"},",
+									"            \"brandColors\":{\"type\":\"array\"},",
+									"            \"fonts\":{\"type\":\"array\",",
+									"                properties: {",
+									"                    \"isPrimary\": {\"type\":\"boolean\"},",
+									"                    \"fontName\": {\"type\":\"string\"},",
+									"                    \"fontUrl\": {\"type\":\"string\"}",
+									"",
+									"            }},",
+									"            \"virtualStage\":{\"type\":\"object\",",
+									"               \"background\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"watermark\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"countdown\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"                \"presenter\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"glowColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"             ",
+									"            },",
+									"",
+									"            \"networkingHub\":{\"type\":\"object\",",
+									"               \"circleGraphics\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"joinNetworking\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"returnToStage\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"             ",
+									"            },",
+									"",
+									"            \"warningNotices\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"buttonColor\": {\"type\":\"null\" || \"string\"}",
+									"                ",
+									"            }},",
+									"",
+									"            \"chat\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"},",
+									"                    \"colors\": {\"type\":\"null\" || \"string\"},",
+									"                    \"badge\": {\"type\":\"object\",",
+									"                             properties: {",
+									"                            \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                            \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                            \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}}},",
+									"",
+									"            \"participantList\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"qna\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"polls\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"privateMessages\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"poweredByIntrovokeLabel\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/v3/events/{{eventId}}/theme",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"events",
+								"{{eventId}}",
+								"theme"
+							]
+						},
+						"description": "### **Returns the event customization theme for the event based on the business rules.**\n\n### [**https://docs.introvoke.com/reference/get_v3-events-eventid-theme**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return default event customization theme",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name: Introvoke Platform Default Theme\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Sequel Platform Default Theme\");",
+									"});",
+									"",
+									"pm.test(\"defaultTheme: true\", function () {",
+									"pm.expect(jsonData.defaultTheme).to.eql(true);",
+									"});",
+									"",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"defaultTheme\":{\"type\":\"boolean\"},",
+									"            \"brandColors\":{\"type\":\"array\"},",
+									"            \"fonts\":{\"type\":\"array\",",
+									"                properties: {",
+									"                    \"isPrimary\": {\"type\":\"boolean\"},",
+									"                    \"fontName\": {\"type\":\"string\"},",
+									"                    \"fontUrl\": {\"type\":\"string\"}",
+									"",
+									"            }},",
+									"            \"virtualStage\":{\"type\":\"object\",",
+									"               \"background\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"watermark\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"countdown\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"                \"presenter\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"glowColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"             ",
+									"            },",
+									"",
+									"            \"networkingHub\":{\"type\":\"object\",",
+									"               \"circleGraphics\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"joinNetworking\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"returnToStage\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"             ",
+									"            },",
+									"",
+									"            \"warningNotices\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"buttonColor\": {\"type\":\"null\" || \"string\"}",
+									"                ",
+									"            }},",
+									"",
+									"            \"chat\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"},",
+									"                    \"colors\": {\"type\":\"null\" || \"string\"},",
+									"                    \"badge\": {\"type\":\"object\",",
+									"                             properties: {",
+									"                            \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                            \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                            \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}}},",
+									"",
+									"            \"participantList\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"qna\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"polls\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"privateMessages\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"poweredByIntrovokeLabel\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/customizations/events/default",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"default"
+							]
+						},
+						"description": "### **Returns the default event customization theme that applies to all events, unless overridden at the company and event level. This endpoint can be used for clients which update to theme or for preview. The default theme can be used as a starting point to edit new themes.**\n\n### [https://docs.introvoke.com/reference/get_customizations-events-default](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return array of color pallets",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/customizations/events/suggested-color-pallets",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"suggested-color-pallets"
+							]
+						},
+						"description": "### **Returns an array of color pallets (with primary, secondary and tertiary colors) that can be used in the editor. This endpoint can be used for clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-suggested-color-pallets**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "add company customization theme overrides",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202 Accepted\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Testing theme\",\n    \"defaultTheme\": true,\n    \"brandColors\": [\n        \"#ff6c43\",\n        \"#302c66\",\n        \"#333333\"\n    ],\n    \"fonts\": [\n        {\"fontName\": \"Inter\",\n            \"fontUrl\": \"https://fonts.googleapis.com/css2?family=Inter&display=swap\",\n            \"isPrimary\": true\n        }\n    ],\n    \"virtualStage\": {\n        \"background\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"watermark\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"countdown\": {\n            \"textColor\": null\n        },\n        \"presenter\": {\n            \"glowColor\": null\n        }\n    },\n    \"networkingHub\": {\n        \"circleGraphics\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"joinNetworking\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"returnToStage\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"warningNotices\": {\n        \"buttonColor\": null\n    },\n    \"chat\": {\n        \"enabled\": true,\n        \"colors\": null,\n        \"badge\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"participantList\": {\n        \"enabled\": true\n    },\n    \"qna\": {\n        \"enabled\": true\n    },\n    \"polls\": {\n        \"enabled\": true\n    },\n    \"privateMessages\": {\n        \"enabled\": true\n    },\n    \"poweredByIntrovokeLabel\": {\n        \"enabled\": true\n    },\n    \"liveReactions\": {\n        \"enabled\": true\n    },\n    \"chatReactions\": {\n        \"enabled\": true\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"company",
+								"{{companyId}}",
+								"all-events"
+							]
+						},
+						"description": "### Adds or updates event customization theme overrides that will be applied to the all events for the company. This endpoint can be used by clients which update to theme or for preview.\n\n### [**https://docs.introvoke.com/reference/post_customizations-events-company-companyid-all-events**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return company theme",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name: Testing theme\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Testing theme\");",
+									"});",
+									"",
+									"pm.test(\"defaultTheme: true\", function () {",
+									"pm.expect(jsonData.defaultTheme).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"fonts: isPrimary true\", function () {",
+									"pm.expect(jsonData.fonts[0].isPrimary).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"fontName: Inter\", function () {",
+									"pm.expect(jsonData.fonts[0].fontName).to.eql(\"Inter\");",
+									"});",
+									"",
+									"pm.test(\"fontUrl\", function () {",
+									"pm.expect(jsonData.fonts[0].fontUrl).to.eql(\"https://fonts.googleapis.com/css2?family=Inter&display=swap\");",
+									"});",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"defaultTheme\":{\"type\":\"boolean\"},",
+									"            \"brandColors\":{\"type\":\"array\"},",
+									"            \"fonts\":{\"type\":\"array\",",
+									"                properties: {",
+									"                    \"isPrimary\": {\"type\":\"boolean\"},",
+									"                    \"fontName\": {\"type\":\"string\"},",
+									"                    \"fontUrl\": {\"type\":\"string\"}",
+									"",
+									"            }},",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"company",
+								"{{companyId}}",
+								"all-events"
+							]
+						},
+						"description": "### **Returns the event customization theme overrides over the platform event customization theme that applies to all events for the company, unless overridden at the event level. This endpoint can be used for clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-company-companyid-all-events**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "delete event customization theme overrides",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customizations/events/company/{{companyId}}/all-events",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"company",
+								"{{companyId}}",
+								"all-events"
+							]
+						},
+						"description": "### **Deletes the event customization theme for company. The events without their own customization will use the default Introvoke Platform theme, after deletion.**\n\n### [**https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-all-events**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "add event customization theme overrides",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202 Accepted\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Testing theme\",\n    \"defaultTheme\": true,\n    \"brandColors\": [\n        \"#ff6c43\",\n        \"#302c66\",\n        \"#333333\"\n    ],\n    \"fonts\": [\n        {\"fontName\": \"Inter\",\n            \"fontUrl\": \"https://fonts.googleapis.com/css2?family=Inter&display=swap\",\n            \"isPrimary\": true\n        }\n    ],\n    \"virtualStage\": {\n        \"background\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"watermark\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"countdown\": {\n            \"textColor\": null\n        },\n        \"presenter\": {\n            \"glowColor\": null\n        }\n    },\n    \"networkingHub\": {\n        \"circleGraphics\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"joinNetworking\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"returnToStage\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"warningNotices\": {\n        \"buttonColor\": null\n    },\n    \"chat\": {\n        \"enabled\": true,\n        \"colors\": null,\n        \"badge\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"participantList\": {\n        \"enabled\": true\n    },\n    \"qna\": {\n        \"enabled\": true\n    },\n    \"polls\": {\n        \"enabled\": true\n    },\n    \"privateMessages\": {\n        \"enabled\": true\n    },\n    \"poweredByIntrovokeLabel\": {\n        \"enabled\": true\n    },\n    \"liveReactions\": {\n        \"enabled\": true\n    },\n    \"chatReactions\": {\n        \"enabled\": true\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"event",
+								"{{eventId}}"
+							]
+						},
+						"description": "### **Adds or updates event customization theme overrides that will be applied for the event. This endpoint can be used by clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/post_customizations-events-event-eventid**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return event theme",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name: Testing theme\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Testing theme\");",
+									"});",
+									"",
+									"pm.test(\"defaultTheme: true\", function () {",
+									"pm.expect(jsonData.defaultTheme).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"fonts: isPrimary true\", function () {",
+									"pm.expect(jsonData.fonts[0].isPrimary).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"fontName: Inter\", function () {",
+									"pm.expect(jsonData.fonts[0].fontName).to.eql(\"Inter\");",
+									"});",
+									"",
+									"pm.test(\"fontUrl\", function () {",
+									"pm.expect(jsonData.fonts[0].fontUrl).to.eql(\"https://fonts.googleapis.com/css2?family=Inter&display=swap\");",
+									"});",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"defaultTheme\":{\"type\":\"boolean\"},",
+									"            \"brandColors\":{\"type\":\"array\"},",
+									"            \"fonts\":{\"type\":\"array\",",
+									"                properties: {",
+									"                    \"isPrimary\": {\"type\":\"boolean\"},",
+									"                    \"fontName\": {\"type\":\"string\"},",
+									"                    \"fontUrl\": {\"type\":\"string\"}",
+									"",
+									"            }},",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"event",
+								"{{eventId}}"
+							]
+						},
+						"description": "### **Returns the event customization theme overrides over the platform and event company customization theme for the event. This endpoint can be used for clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-event-eventid**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "delete event customization theme overrides",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customizations/events/event/{{eventId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"event",
+								"{{eventId}}"
+							]
+						},
+						"description": "### **Deletes the event customization theme overrides for the event. All events default to company specific event customization theme, if it exists or the default platform theme, after deletion.**\n\n### [**https://docs.introvoke.com/reference/delete_customizations-events-event-eventid**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "add new font",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202 Accepted\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"font_id\", jsonData.uid);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fontName\": \"Inter\",\n    \"fontUrl\": \"https://fonts.googleapis.com/css2?family=Inter&display=swap\",\n    \"isIntrovokeManaged\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"company",
+								"{{companyId}}",
+								"fonts"
+							]
+						},
+						"description": "### **Add new fonts for the company. The value is stored at the company level, but can be used by customization themes on both event and company levels. If the name of the font, matches the existing font, it will update the font URL.**\n\n### [**https://docs.introvoke.com/reference/post_customizations-events-company-companyid-fonts**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "return font list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"uid\", function () {",
+									"pm.expect(jsonData[1].uid).to.eql(pm.environment.get(\"font_id\"));",
+									"});",
+									"pm.test(\"fontName\", function () {",
+									"pm.expect(jsonData[1].fontName).to.eql(\"Inter\");",
+									"});",
+									"pm.test(\"fontUrl\", function () {",
+									"pm.expect(jsonData[1].fontUrl).to.eql(\"https://fonts.googleapis.com/css2?family=Inter&display=swap\");",
+									"});",
+									"pm.test(\"isIntrovokeManaged\", function () {",
+									"pm.expect(jsonData[1].isIntrovokeManaged).to.eql(true);",
+									"});",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"array\",",
+									"        properties:{",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"fontName\":{\"type\":\"string\"},",
+									"            \"fontUrl\":{\"type\":\"string\"},",
+									"            \"isIntrovokeManaged\":{\"type\":\"string\"},",
+									"            ",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"company",
+								"{{companyId}}",
+								"fonts"
+							]
+						},
+						"description": "### **Returns list of customized fonts associated with the company.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-company-companyid-fonts**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "unregister font",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/customizations/events/company/{{companyId}}/fonts/font/{{font_id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"customizations",
+								"events",
+								"company",
+								"{{companyId}}",
+								"fonts",
+								"font",
+								"{{font_id}}"
+							]
+						},
+						"description": "### **Unregister the specified font associated with the specified company.**\n\n### [**https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-fonts-font-fontid**](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Daily Run_WebHooks",
+			"item": [
+				{
+					"name": "registering_virtual-stage-event-started",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.environment.set('subscriptionId', pm.response.json().subscriptionId);",
+									"pm.environment.set('clientSecret', pm.response.json().clientSecret);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"eventType: virtual-stage-event-started\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"virtual-stage-event-started\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						},
+						"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "registering_virtual-stage-event-ended",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//pm.environment.set('subscriptionId', pm.response.json().subscriptionId);",
+									"//pm.environment.set('clientSecret', pm.response.json().clientSecret);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"eventType: virtual-stage-event-ended\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"virtual-stage-event-ended\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-ended\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						},
+						"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "registering_new-attendee-pre-registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//pm.environment.set('subscriptionId', pm.response.json().subscriptionId);",
+									"//pm.environment.set('clientSecret', pm.response.json().clientSecret);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"eventType: new-attendee-pre-registration\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"new-attendee-pre-registration\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"new-attendee-pre-registration\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks"
+							]
+						},
+						"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"subscriptionId\", function () {",
+									"    pm.expect(jsonData.subscriptionId).to.eql(pm.environment.get(\"subscriptionId\"))",
+									"});",
+									"pm.test(\"eventType: virtual-stage-event-started\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"virtual-stage-event-started\")",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						},
+						"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "edit webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n\"extendSubscriptionByDays\": 55\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						},
+						"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "renew webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"subscriptionLengthInDays\": 100\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/renew/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"renew",
+								"{{subscriptionId}}"
+							]
+						},
+						"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks)"
+					},
+					"response": []
+				},
+				{
+					"name": "unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/integrations/webhooks/{{subscriptionId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"integrations",
+								"webhooks",
+								"{{subscriptionId}}"
+							]
+						},
+						"description": "#### [https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks](https://docs.introvoke.com/reference/getting-started-with-sequel-web-hooks)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Daily Run_UsageAPI",
+			"item": [
+				{
+					"name": "top-participants endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"company\":{\"type\":\"string\"},",
+									"            \"companyId\":{\"type\":\"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"limit\":{\"type\":\"integer\" },",
+									"            \"eventType\":{\"type\":\"string\" },",
+									"            \"topParticipants\":{\"type\":\"array\",",
+									"                properties:{",
+									"                        \"name\": {\"type\":\"string\"},",
+									"                        \"userEmail\": {\"type\":\"string\"},",
+									"                        \"engagedMinutes\": {\"type\":\"integer\"},",
+									"                        \"eventCount\": {\"type\":\"integer\"}",
+									"                        ",
+									"                    },",
+									"            },",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{companyId}}/top-participants?startDate=2022-09-02&endDate=2024-10-12&limit=10&eventType=jdshvjhs",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"user-engagement",
+								"company",
+								"{{companyId}}",
+								"top-participants"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2022-09-02"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-10-12"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "eventType",
+									"value": "jdshvjhs"
+								},
+								{
+									"key": "engagementType",
+									"value": "jshvdcjhsvcjhw",
+									"disabled": true
+								},
+								{
+									"key": "betaFlag",
+									"value": "kjbd67e",
+									"disabled": true
+								}
+							]
+						},
+						"description": "#### The endpoint returns list of top participants with names, e-mail address, number of events and total live minutes they have engaged on events hosted by the specified company within a date range and event type (if specified).\n\n#### You can return the total engagement for live and onDemand minutes or specify which engagement type you want to return by adding `engagementType` as `live` or `onDemand`.\n\n#### [https://docs.introvoke.com/reference/top-participants-by-event-type-for-a-company](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "events summary and average engagement time",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"company\":{\"type\":\"string\"},",
+									"            \"companyId\":{\"type\":\"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"eventType\":{\"type\":\"string\" },",
+									"            \"events\":{\"type\":\"array\",",
+									"                properties:{",
+									"                        \"eventId\": {\"type\":\"string\"},",
+									"                        \"eventName\": {\"type\":\"string\"},",
+									"                        \"eventType\": {\"type\":\"string\"},",
+									"                        \"circleId\": {\"type\":\"string\"},",
+									"                        \"circleName\": {\"type\":\"string\"},",
+									"                        \"friendlyName\": {\"type\":\"string\"},",
+									"                        \"numberOfUsers\": {\"type\":\"integer\"},",
+									"                        \"averageEngagedMinutesByUser\": {\"type\":\"number\"}",
+									"                    },",
+									"            },",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/user-engagement/company/{{companyId}}/events",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"user-engagement",
+								"company",
+								"{{companyId}}",
+								"events"
+							]
+						},
+						"description": "#### The endpoint returns list of events within date range (past 30 days, default) for a company along with their attendance, total engagement minutes and their average engagement minutes for the session.\n\n#### [https://docs.introvoke.com/reference/events-summary-and-average-engagement-time](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "lifetime usage for a company",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"company\":{\"type\":\"string\"},",
+									"            ",
+									"            \"lifetime\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"summary\":{\"type\":\"object\",",
+									"                            properties:{",
+									"                                \"liveMinutes\": {\"type\":\"integer\"},",
+									"                                \"onDemandMinutes\": {\"type\":\"integer\"},",
+									"                                \"liveEventCount\": {\"type\":\"integer\"},",
+									"                                \"onDemandEventCount\": {\"type\":\"integer\"},",
+									"                                \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+									"                                \"uniqueOnDemandUsersCount\": {\"type\":\"integer\"},",
+									"",
+									"                            },",
+									"                    },",
+									"                    \"detailsByEventType\":{\"type\":\"object\",",
+									"                            properties:{",
+									"                                \"virtualStageEvents\":{\"type\":\"object\",",
+									"                                    properties:{",
+									"                                    \"liveMinutes\": {\"type\":\"integer\"},",
+									"                                    \"onDemandMinutes\": {\"type\":\"integer\"},",
+									"                                    \"liveEventCount\": {\"type\":\"integer\"},",
+									"                                    \"onDemandEventCount\": {\"type\":\"integer\"},",
+									"                                    \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+									"                                    \"uniqueOnDemandUsersCount\": {\"type\":\"integer\"},",
+									"",
+									"                                },",
+									"                                },",
+									"                                \"networkingHubEvents\":{\"type\":\"object\",",
+									"                                    properties:{",
+									"                                    \"liveMinutes\": {\"type\":\"integer\"},",
+									"                                    \"liveEventCount\": {\"type\":\"integer\"},",
+									"                                    \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+									"                                    ",
+									"",
+									"                                },",
+									"                                },",
+									"                            },",
+									"                    },",
+									"                        ",
+									"                    },",
+									"            },",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/company/usage/{{companyId}}",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"company",
+								"usage",
+								"{{companyId}}"
+							]
+						},
+						"description": "#### The endpoint returns lifetime usage statistics for a specified company. A parent company will include all sub-company analytics as well.\n\n#### [https://docs.introvoke.com/reference/lifetime-usage-for-a-company](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "usage for a company in a date range",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"company\":{\"type\":\"string\"},",
+									"            \"dateFrom\":{\"type\":\"string\"},",
+									"            \"dateTo\":{\"type\":\"string\"},",
+									"            \"dateRange\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"summary\":{\"type\":\"object\",",
+									"                            properties:{",
+									"                                \"liveMinutes\": {\"type\":\"integer\"},",
+									"                                \"onDemandMinutes\": {\"type\":\"integer\"},",
+									"                                \"liveEventCount\": {\"type\":\"integer\"},",
+									"                                \"onDemandEventCount\": {\"type\":\"integer\"},",
+									"                                \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+									"                                \"uniqueOnDemandUsersCount\": {\"type\":\"integer\"},",
+									"",
+									"                            },",
+									"                    },",
+									"                    \"detailsByEventType\":{\"type\":\"object\",",
+									"                            properties:{",
+									"                                \"virtualStageEvents\":{\"type\":\"object\",",
+									"                                    properties:{",
+									"                                    \"liveMinutes\": {\"type\":\"integer\"},",
+									"                                    \"onDemandMinutes\": {\"type\":\"integer\"},",
+									"                                    \"liveEventCount\": {\"type\":\"integer\"},",
+									"                                    \"onDemandEventCount\": {\"type\":\"integer\"},",
+									"                                    \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+									"                                    \"uniqueOnDemandUsersCount\": {\"type\":\"integer\"},",
+									"",
+									"                                },",
+									"                                },",
+									"                                \"networkingHubEvents\":{\"type\":\"object\",",
+									"                                    properties:{",
+									"                                    \"liveMinutes\": {\"type\":\"integer\"},",
+									"                                    \"liveEventCount\": {\"type\":\"integer\"},",
+									"                                    \"uniqueLiveUsersCount\": {\"type\":\"integer\"},",
+									"                                    ",
+									"",
+									"                                },",
+									"                                },",
+									"                            },",
+									"                    },",
+									"                        ",
+									"                    },",
+									"            },",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/company/usage/{{companyId}}/dates?start=2021-05-05T00:00:00.000Z&end=2022-10-27T00:00:00.000Z",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"company",
+								"usage",
+								"{{companyId}}",
+								"dates"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "2021-05-05T00:00:00.000Z"
+								},
+								{
+									"key": "end",
+									"value": "2022-10-27T00:00:00.000Z"
+								}
+							]
+						},
+						"description": "#### The endpoint returns usage statistics for a specified company for the given start and end dates (both inclusive). If start or end dates are not provided they default to current server date (today).\n\n#### [https://docs.introvoke.com/reference/usage-for-a-company-in-a-date-range](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "daily minutes in a date range",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/getCompanyDailyMinutes/{{companyId}}?startDate=2021-05-05T00:00:00.000Z&endDate=2022-05-05T00:00:00.000Z",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"getCompanyDailyMinutes",
+								"{{companyId}}"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2021-05-05T00:00:00.000Z"
+								},
+								{
+									"key": "endDate",
+									"value": "2022-05-05T00:00:00.000Z"
+								}
+							]
+						},
+						"description": "#### The endpoint returns usage statistics for a specified company for the given start and end dates (both inclusive). If start or end dates are not provided they default to current server date (today).\n\n#### [https://docs.introvoke.com/reference/daily-minutes-in-a-date-range](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "virtual stage usage by the day in a date range",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            ",
+									"            \"event-live-minutes\":{\"type\":\"array\"},",
+									"            \"event-ondemand-minutes\":{\"type\":\"array\"},",
+									"            \"event-unique-users\":{\"type\":\"array\"},",
+									"            \"totalLiveMinutes\":{\"type\":\"integer\"},",
+									"            \"totalOndemandMinutes\":{\"type\":\"integer\"},",
+									"            \"totalUniqueUsers\":{\"type\":\"integer\"},",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/getCompanyDailyVirtualStageStats/{{companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-10-05T00:00:00.000Z",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"getCompanyDailyVirtualStageStats",
+								"{{companyId}}"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2022-09-05T00:00:00.000Z"
+								},
+								{
+									"key": "endDate",
+									"value": "2022-10-05T00:00:00.000Z"
+								}
+							]
+						},
+						"description": "#### The endpoint returns virtual stage usage (minutes and users) each day in a date range.\n\n#### [https://docs.introvoke.com/reference/daily-virtual-stage-usage-by-the-day](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "networking usage by the day in a date range",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            ",
+									"            \"networking-minutes\":{\"type\":\"array\"},",
+									"            \"networking-unique-users\":{\"type\":\"array\"},",
+									"            \"totalMinutesEngaged\":{\"type\":\"integer\"},",
+									"            \"totalUniqueUsers\":{\"type\":\"integer\"}",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/getCompanyDailyNetworkingStats/{{companyId}}?startDate=2022-09-05T00:00:00.000Z&endDate=2022-09-05T00:00:00.000Z",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"getCompanyDailyNetworkingStats",
+								"{{companyId}}"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2022-09-05T00:00:00.000Z"
+								},
+								{
+									"key": "endDate",
+									"value": "2022-09-05T00:00:00.000Z"
+								}
+							]
+						},
+						"description": "#### The endpoint returns networking usage (minutes and users) each day in a date range.\n\n#### [https://docs.introvoke.com/reference/networking-usage-by-the-day-in-a-date-range](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "participant List with engaged minutes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"eventName\":{\"type\":\"string\"},",
+									"            \"eventId\":{\"type\":\"string\"},",
+									"            \"eventType\":{\"type\":\"string\"},",
+									"            \"company\":{\"type\":\"string\"},",
+									"            \"companyId\":{\"type\":\"string\" },",
+									"            \"startDate\":{\"type\": \"null\" || \"string\" },",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"limit\":{\"type\":\"integer\"},",
+									"            \"numberOfUsers\":{\"type\":\"integer\"},",
+									"            \"totalEngagedMinutes\":{\"type\":\"integer\"},",
+									"            \"averageEngagedMinutesByUser\":{\"type\":\"number\" },",
+									"            \"topParticipants\":{\"type\":\"array\",",
+									"                properties:{",
+									"                        \"name\": {\"type\":\"string\"},",
+									"                        \"userEmail\": {\"type\":\"string\"},",
+									"                        \"engagedMinutes\": {\"type\":\"integer\"}",
+									"                        ",
+									"                        ",
+									"                    },",
+									"            },",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/user-engagement/events/{{eventID}}/top-participants?engagementType=live",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"user-engagement",
+								"events",
+								"{{eventID}}",
+								"top-participants"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2022-09-02",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "2022-10-02",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "engagementType",
+									"value": "live"
+								}
+							]
+						},
+						"description": "#### The endpoint returns list of names, e-mail address and engaged minutes of the top participants and additional statistics, such as total number of users and average engaged minutes for the specified event within a date range (if specified).\n\n#### You can return the total engagement for live and onDemand minutes or specify which engagement type you want to return by adding `engagementType` as `live` or `onDemand`. You can find the charts used by this endpoint in the Event -> Analytics tab in your Sequel dashboard.\n\n#### [https://docs.introvoke.com/reference/participant-list-with-engaged-minutes-by-event](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "live video watched over time",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"VideoViews\":{\"type\":\"array\"}           ",
+									"                    ",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/getVideoWatchOverTime/{{eventID}}",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"getVideoWatchOverTime",
+								"{{eventID}}"
+							]
+						},
+						"description": "#### The endpoint returns peak concurrent users for each minute during a live event.\n\n#### [https://docs.introvoke.com/reference/live-video-watched-over-time](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "get poll results",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"eventId\":{\"type\":\"string\"},",
+									"            \"eventName\":{\"type\":\"string\"},",
+									"            \"polls\":{\"type\":\"array\",",
+									"                properties:{",
+									"                        \"question\": {\"type\":\"string\"},",
+									"                        \"responses\":{\"type\":\"array\",",
+									"                            properties:{",
+									"                              \"text\": {\"type\":\"string\"},",
+									"                              \"users\": {\"type\":\"array\"}",
+									"                        ",
+									"                        ",
+									"                        ",
+									"                    },",
+									"            },",
+									"                        ",
+									"                        ",
+									"                        ",
+									"                    },",
+									"            },",
+									"",
+									"                  ",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/polls",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"events",
+								"{{eventID}}",
+								"polls"
+							]
+						},
+						"description": "#### This endpoint returns all the polls that were run during this event including responses and their user information.\n\n#### [https://docs.introvoke.com/reference/eventseventidpolls](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "get Q&A results",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"eventId\":{\"type\":\"string\"},",
+									"            \"eventName\":{\"type\":\"string\"},",
+									"            \"questions\":{\"type\":\"array\",",
+									"                properties:{",
+									"                        \"question\": {\"type\":\"string\"},",
+									"                        \"upvotes\": {\"type\":\"integer\"},",
+									"                        \"askedBy\": {\"type\":\"string\"},",
+									"                        \"email\": {\"type\":\"string\"},",
+									"                        \"answer\": {\"type\":\"string\"},",
+									"                        \"votedBy\":{\"type\":\"array\",",
+									"                            properties:{",
+									"                              \"name\": {\"type\":\"string\"},",
+									"                              \"userId\": {\"type\":\"string\"},",
+									"                              \"userEmail\": {\"type\":\"string\"}",
+									"                        ",
+									"                        ",
+									"                        ",
+									"                    },",
+									"            },",
+									"                        ",
+									"                        ",
+									"                        ",
+									"                    },",
+									"            },",
+									"",
+									"                  ",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/questions",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"events",
+								"{{eventID}}",
+								"questions"
+							]
+						},
+						"description": "#### This endpoint returns the Q&A results including who asked the questions and who upvoted them.\n\n#### [https://docs.introvoke.com/reference/get-event-qa-results](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				},
+				{
+					"name": "get chat transcripts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"eventId\":{\"type\":\"string\"},",
+									"            \"eventName\":{\"type\":\"string\"},",
+									"            \"chatMessages\":{\"type\":\"array\",",
+									"                properties:{",
+									"                        \"message\": {\"type\":\"string\"},",
+									"                        \"timeElapsed\": {\"type\":\"string\"},",
+									"                        \"dateTime\": {\"type\":\"string\"},",
+									"                        \"name\": {\"type\":\"string\"},",
+									"                        \"email\": {\"type\":\"string\"},",
+									"                        ",
+									"                    },",
+									"            },",
+									"",
+									"                  ",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-analytics}}/api/analytics/events/{{eventID}}/chat-transcript",
+							"host": [
+								"{{url-analytics}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"events",
+								"{{eventID}}",
+								"chat-transcript"
+							]
+						},
+						"description": "#### Get chat transcripts\n\n#### [https://docs.introvoke.com/reference/get-chat-transcripts](https://desktop.postman.com/?desktopVersion=10.0.1&webVersion=10.0.37-ui-221025-1618&userId=23129003&teamId=0)"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

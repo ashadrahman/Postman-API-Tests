@@ -1,0 +1,1107 @@
+{
+	"info": {
+		"_postman_id": "ca901176-51f9-467a-b761-11cc23fcc576",
+		"name": "WebHooks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "registering a webhook",
+			"item": [
+				{
+					"name": "registering_virtual-stage-event-started",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87229deb-3999-4c5b-b9dc-8bc9d093ea74",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.environment.set('subscriptionId', pm.response.json().subscriptionId);",
+									"pm.environment.set('clientSecret', pm.response.json().clientSecret);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"eventType: virtual-stage-event-started\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"virtual-stage-event-started\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "d59d77a3-926e-4cce-924e-78108401b7f0",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks"
+					},
+					"response": []
+				},
+				{
+					"name": "registering_virtual-stage-event-ended",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87229deb-3999-4c5b-b9dc-8bc9d093ea74",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//pm.environment.set('subscriptionId', pm.response.json().subscriptionId);",
+									"//pm.environment.set('clientSecret', pm.response.json().clientSecret);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"eventType: virtual-stage-event-ended\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"virtual-stage-event-ended\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "e1e846a1-09d9-459e-a0de-7e60d98f422e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-ended\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks"
+					},
+					"response": []
+				},
+				{
+					"name": "registering_new-attendee-pre-registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87229deb-3999-4c5b-b9dc-8bc9d093ea74",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//pm.environment.set('subscriptionId', pm.response.json().subscriptionId);",
+									"//pm.environment.set('clientSecret', pm.response.json().clientSecret);",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"eventType: new-attendee-pre-registration\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"new-attendee-pre-registration\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "46293934-732b-4650-9710-80714b89ed6f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"new-attendee-pre-registration\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks"
+					},
+					"response": []
+				},
+				{
+					"name": "invalid eventType_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87229deb-3999-4c5b-b9dc-8bc9d093ea74",
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to create subscription\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to create subscription.\");",
+									"});",
+									"",
+									"pm.test(\"validationErrors: eventType - must be equal to one of the allowed values\", function () {",
+									"    pm.expect(jsonData.validationErrors[0]).to.eql(\"/eventType - must be equal to one of the allowed values\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "b7f1a01d-5c28-4c23-abc8-d95d76cd727d",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"hsdbjshbv923842\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks"
+					},
+					"response": []
+				},
+				{
+					"name": "subscription outofrange>365_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87229deb-3999-4c5b-b9dc-8bc9d093ea74",
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to create subscription\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to create subscription.\");",
+									"});",
+									"",
+									"pm.test(\"validationErrors: subscriptionLengthInDays - must be <= 365\", function () {",
+									"    pm.expect(jsonData.validationErrors[0]).to.eql(\"/subscriptionInfo/subscriptionLengthInDays - must be <= 365\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "30eaad6e-b050-4ea4-8c06-5ba8d227a971",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 500\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks"
+					},
+					"response": []
+				},
+				{
+					"name": "subscription outofrange<2_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87229deb-3999-4c5b-b9dc-8bc9d093ea74",
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to create subscription\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to create subscription.\");",
+									"});",
+									"",
+									"pm.test(\"validationErrors: subscriptionLengthInDays - must be >= 2\", function () {",
+									"    pm.expect(jsonData.validationErrors[0]).to.eql(\"/subscriptionInfo/subscriptionLengthInDays - must be >= 2\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "247edbc1-877c-4790-8ec2-1be7c6088439",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 1\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks"
+					},
+					"response": []
+				},
+				{
+					"name": "invalid companyId_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87229deb-3999-4c5b-b9dc-8bc9d093ea74",
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to create subscription\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to create subscription.\");",
+									"});",
+									"",
+									"pm.test(\"message: Unable to find company with id: jafshtw564253£@^7thaMoXcgV\", function () {",
+									"    pm.expect(jsonData.validationErrors[0].message).to.eql(\"Unable to find company with id: jafshtw564253£@^7thaMoXcgV\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "a28c8899-8f56-489d-8919-62d881ea0ae0",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{invalid_companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 10\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks"
+					},
+					"response": []
+				},
+				{
+					"name": "without token_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87229deb-3999-4c5b-b9dc-8bc9d093ea74",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: No token found in the request\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "953a3e26-d1b6-4d07-9dd1-36b60d6d170c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks"
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_registering",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87229deb-3999-4c5b-b9dc-8bc9d093ea74",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Invalid token\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "e087d53d-348e-4e6c-99ee-3f2cadce5a2b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{wrong_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"eventType\": \"virtual-stage-event-started\",\n\"subscriptionInfo\": {\n    \"companyId\": \"{{companyId}}\",\n    \"eventId\": \"d213f285-4d73-4dfe-94fe-a84b8f99643b\",\n    \"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n    \"subscriptionLengthInDays\": 90\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks"
+					},
+					"response": []
+				}
+			],
+			"id": "799843dc-5282-463d-9820-31e5d971452f"
+		},
+		{
+			"name": "retrieving webhook",
+			"item": [
+				{
+					"name": "retrieve webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"subscriptionId\", function () {",
+									"    pm.expect(jsonData.subscriptionId).to.eql(pm.environment.get(\"subscriptionId\"))",
+									"});",
+									"pm.test(\"eventType: virtual-stage-event-started\", function () {",
+									"    pm.expect(jsonData.eventType).to.eql(\"virtual-stage-event-started\")",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "092a3ac7-ed81-4741-bf80-305b3c75db60",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "invalid subscriptionId_retrieve webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to find subscription.\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to find subscription.\")",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "f70044d9-32ac-446f-a670-d7c376cccf4c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{invalid_subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "without token_retrieve webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: No token found in the request\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "64e51026-aeed-46a8-98cd-a64faf6d04bc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_retrieve webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Invalid token\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "e2ac8ec4-f3f4-4e0d-8a99-19d5adbfb8c7",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{wrong_token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				}
+			],
+			"id": "0995462e-e273-4b26-893f-f88d32c5ff19"
+		},
+		{
+			"name": "editing webhook",
+			"item": [
+				{
+					"name": "edit webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "5f759271-82c8-46df-b62f-22b5ad004d94",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n\"extendSubscriptionByDays\": 55\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "invalid subscriptionId_edit webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "dedd195a-31a3-48ed-9f95-71f245c99d80",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n\"extendSubscriptionByDays\": 55\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks/{{invalid_subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "without token_edit webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "21e47490-aa1e-4e3a-9749-a35244529a4d",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_edit webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "bcef0c6c-8bc2-4813-9b53-4592ad183ad9",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{wrong_token}}"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				}
+			],
+			"id": "1d8e6203-7473-4dc1-8914-332e1117aa75"
+		},
+		{
+			"name": "renewing webhook",
+			"item": [
+				{
+					"name": "renew webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "da36feb2-1ff6-4737-ba23-efd3536a51ae",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"subscriptionLengthInDays\": 100\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "invalid subscriptionId_renew webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "3305b41c-295d-4089-86b4-4a0f8ff59666",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"subscriptionLengthInDays\": 100\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks/{{invalid_subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "without token_renew webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "efa5303b-8bf4-41ad-9420-150a11a6b0e1",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_renew webook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "b1dbc129-c98e-4649-b435-9dbc4324b7db",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{wrong_token}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				}
+			],
+			"id": "b0a1b540-9bae-41a7-ac22-d52c65644c02"
+		},
+		{
+			"name": "unregistering webhook",
+			"item": [
+				{
+					"name": "unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "36a4d0d2-1389-4438-bc1e-26b00bffa7ac",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "same subscriptionId_unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to find subscription.\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to find subscription.\")",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "2a614984-a2f1-4b49-9d73-b892da78ff4a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve deleted webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"message: Unable to find subscription.\", function () {",
+									"    pm.expect(jsonData.message).to.eql(\"Unable to find subscription.\")",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "a4ba0b30-3614-4396-846d-e45899f45823",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "invalid subscriptionId_unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "f27b14d0-6778-46a1-9140-9940cdc31d69",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"subscriptionInfo\": {\n\"endpoint\": \"https://4007-2001-8a0-72b5-1300-70f5-1111-8297-f032.eu.ngrok.io\",\n\"extendSubscriptionByDays\": 55\n}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/integrations/webhooks/{{invalid_subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "without token_unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "8876121f-aa59-4724-9587-5903b27de61a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_unregister webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b76f8d-fdb0-4e64-9b00-557d81e9fad2",
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "8ec1c4ae-09e8-40a8-b5e1-eaa956e3d966",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{wrong_token}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "{{url}}/api/integrations/webhooks/{{subscriptionId}}"
+					},
+					"response": []
+				}
+			],
+			"id": "a704f37f-7d1a-4d22-b10a-b0878965148e"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "{{jwt_access_token}}"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "8394c418-3909-4ddd-8e10-2f5a2fd5c647",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "0b5183e0-ea8e-41c6-befe-e82624a5835e",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

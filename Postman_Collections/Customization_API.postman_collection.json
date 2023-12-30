@@ -1,0 +1,3065 @@
+{
+	"info": {
+		"_postman_id": "505b9193-852c-4c63-96f2-8d08e1838562",
+		"name": "Customization_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "company theme",
+			"item": [
+				{
+					"name": "Fetch auth token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1aad9736-be15-45d5-b55d-3a96f31fdaab",
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"jwt_access_token\", jsonData.access_token);",
+									"",
+									" function parseJwt (token,part) {",
+									"   var base64Url = token.split('.')[part];",
+									"   var words = CryptoJS.enc.Base64.parse(base64Url);",
+									"   var jsonPayload = CryptoJS.enc.Utf8.stringify(words);",
+									"   return  JSON.parse(jsonPayload);",
+									"};",
+									"",
+									"var jwtInfo ={};",
+									"jwtInfo.size = jsonData.access_token.length;",
+									"jwtInfo.header = parseJwt(jsonData.access_token,0);",
+									"jwtInfo.payload = parseJwt(jsonData.access_token,1);",
+									"jwtInfo.signature = jsonData.access_token.split('.')[2];",
+									"jwtInfo.expires = ((jwtInfo.payload.exp-Date.now().valueOf()/1000)/60).toFixed(1);",
+									"console.log(jwtInfo);",
+									"",
+									"var template = `",
+									"<b>JWT  Size:{{response.size}}Bytes. Expires in {{response.expires}} minutes</b><br>",
+									"<b>Header </b>",
+									"    <table>",
+									"        <tr><th>Property</th><th>Value</th></tr>",
+									"        {{#each response.header}}",
+									"            <tr><td>{{@key}}</td><td>{{.}}</td></tr>",
+									"        {{/each}}",
+									"    </table>",
+									"<b>Payload</b>",
+									"    <table>",
+									"        <tr><th>Property</th><th>Value</th></tr>",
+									"        {{#each response.payload}}",
+									"            <tr><td>{{@key}}</td><td>{{.}}</td></tr>",
+									"        {{/each}}",
+									"    </table>",
+									" <b>Claims</b>",
+									"    <table bgcolor=\"#FFFFFF\">",
+									"        <tr><th>Claim</th><th>Value</th></tr>",
+									"        {{#each response.payload.Claims}}",
+									"            <tr>",
+									"                {{#each this}}",
+									"                    <td>{{.}}</td>       ",
+									"                {{/each}}",
+									"            </tr>",
+									"        {{/each}}",
+									"    </table>",
+									"  <i>signature:{{response.signature}}</i>",
+									"`;",
+									"pm.visualizer.set(template, {response: jwtInfo});",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"let [header, payload, signature] = jsonData.access_token.split('.');",
+									"",
+									"function decode(x) {",
+									"    let wordArray = CryptoJS.enc.Base64.parse(x);",
+									"    let str = CryptoJS.enc.Utf8.stringify(wordArray);",
+									"    return JSON.parse(str);",
+									"}",
+									"",
+									"console.log(\"Header: \", decode(header));",
+									"console.log(\"Payload: \", decode(payload));",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"token_type: Bearer\", function () {",
+									"pm.expect(jsonData.token_type).to.eql(\"Bearer\");",
+									"});",
+									"pm.test(\"expires_in: 86400 seconds\", function () {",
+									"pm.expect(jsonData.expires_in).to.eql(86400);",
+									"});",
+									"",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"access_token\":{\"type\":\"string\"},",
+									"            \"token_type\":{\"type\":\"string\"},",
+									"            \"expires_in\":{\"type\":\"integer\"}",
+									"            ",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "72a8fc98-da64-4866-b3de-bd70312168ba",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": \"{{client_id}}\",\n    \"client_secret\": \"{{client_secret}}\",\n    \"audience\": \"{{audience}}\",\n    \"grant_type\": \"{{grant_type}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/oauth/token"
+					},
+					"response": []
+				},
+				{
+					"name": "return company customization theme for all events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a60dc231-c41d-4ec6-80bc-88313a33fcd2",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name: Introvoke Platform Default Theme\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Sequel Platform Default Theme\");",
+									"});",
+									"",
+									"pm.test(\"defaultTheme: true\", function () {",
+									"pm.expect(jsonData.defaultTheme).to.eql(true);",
+									"});",
+									"",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"defaultTheme\":{\"type\":\"boolean\"},",
+									"            \"brandColors\":{\"type\":\"array\"},",
+									"            \"fonts\":{\"type\":\"array\",",
+									"                properties: {",
+									"                    \"isPrimary\": {\"type\":\"boolean\"},",
+									"                    \"fontName\": {\"type\":\"string\"},",
+									"                    \"fontUrl\": {\"type\":\"string\"}",
+									"",
+									"            }},",
+									"            \"virtualStage\":{\"type\":\"object\",",
+									"               \"background\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"watermark\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"countdown\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"                \"presenter\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"glowColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"             ",
+									"            },",
+									"",
+									"            \"networkingHub\":{\"type\":\"object\",",
+									"               \"circleGraphics\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"joinNetworking\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"returnToStage\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"             ",
+									"            },",
+									"",
+									"            \"warningNotices\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"buttonColor\": {\"type\":\"null\" || \"string\"}",
+									"                ",
+									"            }},",
+									"",
+									"            \"chat\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"},",
+									"                    \"colors\": {\"type\":\"null\" || \"string\"},",
+									"                    \"badge\": {\"type\":\"object\",",
+									"                             properties: {",
+									"                            \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                            \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                            \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}}},",
+									"",
+									"            \"participantList\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"qna\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"polls\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"privateMessages\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"poweredByIntrovokeLabel\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "fb2a76df-678a-4471-ad8b-9855f93d124e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/v3/companies/{{companyId}}/theme"
+					},
+					"response": []
+				},
+				{
+					"name": "invalid companyId_return company customization theme for all events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a60dc231-c41d-4ec6-80bc-88313a33fcd2",
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "8146ec9b-6cf7-4a5b-890d-3a91fa77d5cc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/v3/companies/{{invalid_companyId}}/theme"
+					},
+					"response": []
+				},
+				{
+					"name": "without token_return company customization theme for all events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a60dc231-c41d-4ec6-80bc-88313a33fcd2",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "25e4b182-7360-4951-a3df-c0efe44f0beb",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/v3/companies/{{companyId}}/theme"
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_return company customization theme for all events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a60dc231-c41d-4ec6-80bc-88313a33fcd2",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "ee2c07ed-ec0c-4a21-9bf1-e25aacab16cc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{wrong_token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/v3/companies/{{companyId}}/theme"
+					},
+					"response": []
+				}
+			],
+			"id": "43a8f7de-ad70-4926-a58d-b35c4f5f5862",
+			"description": "### **Returns the event customization theme for all events for the company based on the business rules.**\n\n### [**https://docs.introvoke.com/reference/get_v3-companies-companyid-theme**](https://docs.introvoke.com/reference/get_v3-companies-companyid-theme)"
+		},
+		{
+			"name": "event theme",
+			"item": [
+				{
+					"name": "create new event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b0c5faae-107b-480e-8c54-b3881d8d82bd",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.environment.set('eventId', pm.response.json().uid);",
+									"",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"companyUid\", function () {",
+									"pm.expect(jsonData.companyUid).to.eql(pm.environment.get(\"companyId\"));",
+									"});",
+									"",
+									"pm.test(\"startDate\", function () {",
+									"pm.expect(jsonData.startDate).to.eql(pm.environment.get(\"event_startDate\"));",
+									"});",
+									"",
+									"pm.test(\"endDate\", function () {",
+									"pm.expect(jsonData.endDate).to.eql(pm.environment.get(\"event_endDate\"));",
+									"});",
+									"",
+									"pm.test(\"name\", function () {",
+									"pm.expect(jsonData.name).to.eql(pm.environment.get(\"event_name\"));",
+									"});",
+									"",
+									"pm.test(\"timezone\", function () {",
+									"pm.expect(jsonData.timezone).to.eql(pm.environment.get(\"event_timezone\"));",
+									"});",
+									"",
+									"pm.test(\"type\", function () {",
+									"pm.expect(jsonData.type).to.eql(pm.environment.get(\"event_type\"));",
+									"});",
+									"",
+									"",
+									"",
+									"//schema vaildation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"uid\":{\"type\":\"string\"},",
+									"            \"companyUid\":{\"type\":\"string\"},",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"startDate\":{\"type\":\"string\"},",
+									"            \"endDate\":{\"type\":\"string\"},",
+									"            \"timezone\":{\"type\":\"string\"},",
+									"            \"type\":{\"type\":\"string\"},",
+									"            \"eventInfo\":{\"type\":\"object\",",
+									"                properties:{",
+									"                    \"privateEventInfo\":{\"type\": \"object\",",
+									"                    properties:{",
+									"                        \"attendeePasscode\": {\"type\":\"string\"},",
+									"                        \"presenterPasscode\": {\"type\":\"string\"},",
+									"                        \"hostPasscode\": {\"type\":\"string\"},",
+									"                        \"rtmpKey\": {\"type\":\"string\"},",
+									"                        \"rtmpUrl\": {\"type\":\"string\"}",
+									"",
+									"                    }",
+									"                }",
+									"            },",
+									"            ",
+									"        }",
+									"    }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "43de4f09-1cb5-4bc4-8a1d-ec73bf7b0399",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyId\": \"{{companyId}}\",\n    \"name\": \"{{event_name}}\",\n    \"startDate\": \"{{event_startDate}}\",\n    \"endDate\": \"{{event_endDate}}\",\n    \"timezone\": \"{{event_timezone}}\",\n    \"type\": \"{{event_type}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/api/v1/event/create"
+					},
+					"response": []
+				},
+				{
+					"name": "return event customization theme for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "423033de-a366-4734-b86b-859b9683e7b3",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.test(\"name: Introvoke Platform Default Theme\", function () {",
+									"pm.expect(jsonData.name).to.eql(\"Sequel Platform Default Theme\");",
+									"});",
+									"",
+									"pm.test(\"defaultTheme: true\", function () {",
+									"pm.expect(jsonData.defaultTheme).to.eql(true);",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"//schema validation",
+									"const ajv = require('ajv');",
+									"const Ajv = ajv();",
+									"pm.test(\"schema validation\", ()=>{",
+									"    const schema = {",
+									"        type: \"object\",",
+									"        properties:{",
+									"            \"name\":{\"type\":\"string\"},",
+									"            \"defaultTheme\":{\"type\":\"boolean\"},",
+									"            \"brandColors\":{\"type\":\"array\"},",
+									"            \"fonts\":{\"type\":\"array\",",
+									"                properties: {",
+									"                    \"isPrimary\": {\"type\":\"boolean\"},",
+									"                    \"fontName\": {\"type\":\"string\"},",
+									"                    \"fontUrl\": {\"type\":\"string\"}",
+									"",
+									"            }},",
+									"            \"virtualStage\":{\"type\":\"object\",",
+									"               \"background\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"watermark\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"countdown\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"                \"presenter\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"glowColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"             ",
+									"            },",
+									"",
+									"            \"networkingHub\":{\"type\":\"object\",",
+									"               \"circleGraphics\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"joinNetworking\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }},",
+									"               \"returnToStage\": {\"type\":\"object\",",
+									"                    properties: {",
+									"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}, ",
+									"             ",
+									"            },",
+									"",
+									"            \"warningNotices\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"buttonColor\": {\"type\":\"null\" || \"string\"}",
+									"                ",
+									"            }},",
+									"",
+									"            \"chat\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"},",
+									"                    \"colors\": {\"type\":\"null\" || \"string\"},",
+									"                    \"badge\": {\"type\":\"object\",",
+									"                             properties: {",
+									"                            \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+									"                            \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+									"                            \"textColor\": {\"type\":\"null\" || \"string\"}",
+									"",
+									"            }}}},",
+									"",
+									"            \"participantList\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"qna\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"polls\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"privateMessages\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"",
+									"            \"poweredByIntrovokeLabel\":{\"type\":\"object\",",
+									"                properties: {",
+									"                    \"enabled\": {\"type\":\"boolean\"}   ",
+									"            }},",
+									"        }",
+									"    }",
+									"",
+									"    const validate = Ajv.compile(schema);",
+									"    const res = pm.response.json();",
+									"    const isValid = validate(res);",
+									"    pm.expect(isValid).to.be.true;",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "714f4c2b-8f1f-4db8-ad1f-ec0224196910",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/v3/events/{{eventId}}/theme"
+					},
+					"response": []
+				},
+				{
+					"name": "invalid eventId_return event customization theme for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "24c1c784-6230-461b-b3cf-28477d3def6a",
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "b539197b-aaf7-4f65-9f2e-efc81dc14a6f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/v3/events/{{invalid_eventId}}/theme"
+					},
+					"response": []
+				},
+				{
+					"name": "without token_return event customization theme for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "40fce4c9-8546-4f19-a456-9d34d55237ee",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "aa4cbf55-707d-4a36-bc37-619ea43e9d65",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/v3/events/{{eventId}}/theme"
+					},
+					"response": []
+				},
+				{
+					"name": "wrong token_return event customization theme for the event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "4f37b8c9-cb89-41f9-aef5-962325b0d5cb",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "43ae53e8-e56f-4dc5-bf1e-15b352930c13",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{wrong_token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/api/v3/events/{{eventId}}/theme"
+					},
+					"response": []
+				}
+			],
+			"id": "5109fe16-ff24-4221-b605-77a7e7bd47bd",
+			"description": "### **Returns the event customization theme for the event based on the business rules.**\n\n### [**https://docs.introvoke.com/reference/get_v3-events-eventid-theme**](https://docs.introvoke.com/reference/get_v3-events-eventid-theme)"
+		},
+		{
+			"name": "platform",
+			"item": [
+				{
+					"name": "default customization theme",
+					"item": [
+						{
+							"name": "return default event customization theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "96c216dd-550f-45a8-8fac-c28f04ae254b",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"name: Introvoke Platform Default Theme\", function () {",
+											"pm.expect(jsonData.name).to.eql(\"Sequel Platform Default Theme\");",
+											"});",
+											"",
+											"pm.test(\"defaultTheme: true\", function () {",
+											"pm.expect(jsonData.defaultTheme).to.eql(true);",
+											"});",
+											"",
+											"",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"name\":{\"type\":\"string\"},",
+											"            \"defaultTheme\":{\"type\":\"boolean\"},",
+											"            \"brandColors\":{\"type\":\"array\"},",
+											"            \"fonts\":{\"type\":\"array\",",
+											"                properties: {",
+											"                    \"isPrimary\": {\"type\":\"boolean\"},",
+											"                    \"fontName\": {\"type\":\"string\"},",
+											"                    \"fontUrl\": {\"type\":\"string\"}",
+											"",
+											"            }},",
+											"            \"virtualStage\":{\"type\":\"object\",",
+											"               \"background\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"               \"watermark\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"               \"countdown\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }}, ",
+											"                \"presenter\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"glowColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"             ",
+											"            },",
+											"",
+											"            \"networkingHub\":{\"type\":\"object\",",
+											"               \"circleGraphics\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"               \"joinNetworking\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }},",
+											"               \"returnToStage\": {\"type\":\"object\",",
+											"                    properties: {",
+											"                    \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                    \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                    \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }}, ",
+											"             ",
+											"            },",
+											"",
+											"            \"warningNotices\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"buttonColor\": {\"type\":\"null\" || \"string\"}",
+											"                ",
+											"            }},",
+											"",
+											"            \"chat\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"},",
+											"                    \"colors\": {\"type\":\"null\" || \"string\"},",
+											"                    \"badge\": {\"type\":\"object\",",
+											"                             properties: {",
+											"                            \"backgroundColor\": {\"type\":\"null\" || \"string\"},",
+											"                            \"imageUrl\": {\"type\":\"null\" || \"string\"},",
+											"                            \"textColor\": {\"type\":\"null\" || \"string\"}",
+											"",
+											"            }}}},",
+											"",
+											"            \"participantList\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"",
+											"            \"qna\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"",
+											"            \"polls\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"",
+											"            \"privateMessages\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"",
+											"            \"poweredByIntrovokeLabel\":{\"type\":\"object\",",
+											"                properties: {",
+											"                    \"enabled\": {\"type\":\"boolean\"}   ",
+											"            }},",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "ccf80685-0986-4a73-8300-3caf468576e3",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/default"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return default event customization theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "27f313dd-52f2-46c6-b85f-c445fc222d2c",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "8796d740-7fbd-4bdf-be6b-0306fa16939d",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/default"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return default event customization theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "6fd19863-49fd-451b-8520-a21e91b396b3",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "8724adf8-92e9-48f2-a85b-8fcbb713d007",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/default"
+							},
+							"response": []
+						}
+					],
+					"id": "89c419c4-2f01-41e1-90ea-a707b5e9de88",
+					"description": "### **Returns the default event customization theme that applies to all events, unless overridden at the company and event level. This endpoint can be used for clients which update to theme or for preview. The default theme can be used as a starting point to edit new themes.**\n\n### [https://docs.introvoke.com/reference/get_customizations-events-default](https://docs.introvoke.com/reference/get_customizations-events-default)"
+				},
+				{
+					"name": "color pallets",
+					"item": [
+						{
+							"name": "return array of color pallets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "d4df5509-ef8f-4449-9b85-4e828c185085",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "1395d697-b6ab-4eb8-9d1c-6c183f89eea6",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/suggested-color-pallets"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return array of color pallets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f8ad38a2-2df3-43cf-ac2d-bef05511bb07",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "0305f5e1-972b-4884-9357-6e8e4b82d0e2",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/suggested-color-pallets"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return array of color pallets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "5a7493ee-5627-4cc8-b1db-cb61b0775f50",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "f4bc7a90-7300-4811-b7f5-0de648eccdd8",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/suggested-color-pallets"
+							},
+							"response": []
+						}
+					],
+					"id": "6bf4c494-6288-4b7d-b36a-d98028d46bce",
+					"description": "### **Returns an array of color pallets (with primary, secondary and tertiary colors) that can be used in the editor. This endpoint can be used for clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-suggested-color-pallets**](https://docs.introvoke.com/reference/get_customizations-events-suggested-color-pallets)"
+				}
+			],
+			"id": "8665f747-dfb0-41c5-97df-06551c4d64c8",
+			"description": "### **Returns the default event customization theme that applies to all events.**"
+		},
+		{
+			"name": "company theme overrides",
+			"item": [
+				{
+					"name": "add-update event customization theme overrides",
+					"item": [
+						{
+							"name": "add company customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "73d42706-f6cd-4d17-83be-ccec966b5bc3",
+										"exec": [
+											"pm.test(\"Status code is 202 Accepted\", function () {",
+											"    pm.response.to.have.status(202);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "b26f96bb-a1a5-40d3-b6ba-7333107fff6d",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Testing theme\",\n    \"defaultTheme\": true,\n    \"brandColors\": [\n        \"#ff6c43\",\n        \"#302c66\",\n        \"#333333\"\n    ],\n    \"fonts\": [\n        {\"fontName\": \"Inter\",\n            \"fontUrl\": \"https://fonts.googleapis.com/css2?family=Inter&display=swap\",\n            \"isPrimary\": true\n        }\n    ],\n    \"virtualStage\": {\n        \"background\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"watermark\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"countdown\": {\n            \"textColor\": null\n        },\n        \"presenter\": {\n            \"glowColor\": null\n        }\n    },\n    \"networkingHub\": {\n        \"circleGraphics\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"joinNetworking\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"returnToStage\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"warningNotices\": {\n        \"buttonColor\": null\n    },\n    \"chat\": {\n        \"enabled\": true,\n        \"colors\": null,\n        \"badge\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"participantList\": {\n        \"enabled\": true\n    },\n    \"qna\": {\n        \"enabled\": true\n    },\n    \"polls\": {\n        \"enabled\": true\n    },\n    \"privateMessages\": {\n        \"enabled\": true\n    },\n    \"poweredByIntrovokeLabel\": {\n        \"enabled\": true\n    },\n    \"liveReactions\": {\n        \"enabled\": true\n    },\n    \"chatReactions\": {\n        \"enabled\": true\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "update with wrong schema",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "73d42706-f6cd-4d17-83be-ccec966b5bc3",
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Introvoke Event Customization Theme does not match the schema.\", function () {",
+											"pm.expect(jsonData.message).to.eql(\"Introvoke Event Customization Theme does not match the schema.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "b3540a3f-77ab-4363-af3e-bd582257c7ca",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_add company customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "50788587-43a2-4aab-a8e9-73170ecef83d",
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "46333208-3874-4fff-9bcd-dca27b0d9f04",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"dsfgdb\",\n    \"defaultTheme\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_add company customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "2889cc51-b080-49fa-b022-b4d05973293a",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "35c2d2dc-fde6-481e-b994-cada7e767687",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_add company customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "5bdb711f-9aed-404e-aa53-ab1bf11bf3cc",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "283eb720-f272-47c1-91ec-8945caf54a96",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						}
+					],
+					"id": "1eefb1ff-963d-414c-a904-580842fa94cc",
+					"description": "### Adds or updates event customization theme overrides that will be applied to the all events for the company. This endpoint can be used by clients which update to theme or for preview.\n\n### [**https://docs.introvoke.com/reference/post_customizations-events-company-companyid-all-events**](https://docs.introvoke.com/reference/post_customizations-events-company-companyid-all-events)"
+				},
+				{
+					"name": "return company theme overrides",
+					"item": [
+						{
+							"name": "return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "3b1c1c64-c31c-4322-9c84-9b19050990cd",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"name: Testing theme\", function () {",
+											"pm.expect(jsonData.name).to.eql(\"Testing theme\");",
+											"});",
+											"",
+											"pm.test(\"defaultTheme: true\", function () {",
+											"pm.expect(jsonData.defaultTheme).to.eql(true);",
+											"});",
+											"",
+											"pm.test(\"fonts: isPrimary true\", function () {",
+											"pm.expect(jsonData.fonts[0].isPrimary).to.eql(true);",
+											"});",
+											"",
+											"pm.test(\"fontName: Inter\", function () {",
+											"pm.expect(jsonData.fonts[0].fontName).to.eql(\"Inter\");",
+											"});",
+											"",
+											"pm.test(\"fontUrl\", function () {",
+											"pm.expect(jsonData.fonts[0].fontUrl).to.eql(\"https://fonts.googleapis.com/css2?family=Inter&display=swap\");",
+											"});",
+											"",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"name\":{\"type\":\"string\"},",
+											"            \"defaultTheme\":{\"type\":\"boolean\"},",
+											"            \"brandColors\":{\"type\":\"array\"},",
+											"            \"fonts\":{\"type\":\"array\",",
+											"                properties: {",
+											"                    \"isPrimary\": {\"type\":\"boolean\"},",
+											"                    \"fontName\": {\"type\":\"string\"},",
+											"                    \"fontUrl\": {\"type\":\"string\"}",
+											"",
+											"            }},",
+											"            ",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "6356d5d5-e4a8-4fe9-b21e-704fcfa393de",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "5c3b832b-db24-4a2b-bac1-19e550f2ef8f",
+										"exec": [
+											"pm.test(\"Status code is 400 Bad Request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "82646a56-f6ea-4f0f-80ba-ce2fab77d541",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "563c66d2-4773-4d81-9520-3999f8439d3d",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "75039b2e-f99e-4b70-ac1e-33aa3d0357e5",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "9e66efa0-c228-4a7d-8eba-5d27482f9b85",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "1b422d83-ccab-492c-adb7-682143679958",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events"
+							},
+							"response": []
+						}
+					],
+					"id": "9a4bc41f-b753-42cd-8f75-63e452994934",
+					"description": "### **Returns the event customization theme overrides over the platform event customization theme that applies to all events for the company, unless overridden at the event level. This endpoint can be used for clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-company-companyid-all-events**](https://docs.introvoke.com/reference/get_customizations-events-company-companyid-all-events)"
+				},
+				{
+					"name": "delete event customization theme overrides",
+					"item": [
+						{
+							"name": "delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c44e765f-4d60-4bab-a87b-232417e8041f",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "6e163804-c02d-4f00-aa81-524d283d778d",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "return company theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "3b1c1c64-c31c-4322-9c84-9b19050990cd",
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "c28a04bf-ddac-4d0e-bb79-863adc9abb6e",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "delete again event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c44e765f-4d60-4bab-a87b-232417e8041f",
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "a2c03b9c-14f6-4b9b-aeda-fc0ddf9b3ae2",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "b05dbaa7-23a1-458f-819e-c57b8cd8d444",
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "bf5ac19a-8d47-4100-8978-a9d82682b756",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "389fbec4-4f4d-4448-bbf0-a910693fb876",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "0b6b04ce-67ce-40f7-8e37-b0db9810d765",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "e00e1c79-903e-4cc2-8b9a-00033cbad2dc",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "062d87c8-e500-4a3c-a9bb-a8c05183a800",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/all-events"
+							},
+							"response": []
+						}
+					],
+					"id": "1e7a431a-2938-4056-9fa6-62f9ba5d62b1",
+					"description": "### **Deletes the event customization theme for company. The events without their own customization will use the default Introvoke Platform theme, after deletion.**\n\n### [**https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-all-events**](https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-all-events)"
+				}
+			],
+			"id": "3635c63a-9845-444d-983a-4800afd5d451"
+		},
+		{
+			"name": "event theme overrides",
+			"item": [
+				{
+					"name": "add-update event customization theme overrides",
+					"item": [
+						{
+							"name": "add event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "b5c930fe-b766-4e5f-9319-5cf482087287",
+										"exec": [
+											"pm.test(\"Status code is 202 Accepted\", function () {",
+											"    pm.response.to.have.status(202);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "126f99f0-565d-4e14-8830-640a998ed7d1",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Testing theme\",\n    \"defaultTheme\": true,\n    \"brandColors\": [\n        \"#ff6c43\",\n        \"#302c66\",\n        \"#333333\"\n    ],\n    \"fonts\": [\n        {\"fontName\": \"Inter\",\n            \"fontUrl\": \"https://fonts.googleapis.com/css2?family=Inter&display=swap\",\n            \"isPrimary\": true\n        }\n    ],\n    \"virtualStage\": {\n        \"background\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"watermark\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"countdown\": {\n            \"textColor\": null\n        },\n        \"presenter\": {\n            \"glowColor\": null\n        }\n    },\n    \"networkingHub\": {\n        \"circleGraphics\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"joinNetworking\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        },\n        \"returnToStage\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"warningNotices\": {\n        \"buttonColor\": null\n    },\n    \"chat\": {\n        \"enabled\": true,\n        \"colors\": null,\n        \"badge\": {\n            \"backgroundColor\": null,\n            \"imageUrl\": null,\n            \"textColor\": null\n        }\n    },\n    \"participantList\": {\n        \"enabled\": true\n    },\n    \"qna\": {\n        \"enabled\": true\n    },\n    \"polls\": {\n        \"enabled\": true\n    },\n    \"privateMessages\": {\n        \"enabled\": true\n    },\n    \"poweredByIntrovokeLabel\": {\n        \"enabled\": true\n    },\n    \"liveReactions\": {\n        \"enabled\": true\n    },\n    \"chatReactions\": {\n        \"enabled\": true\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "update with wrong schema",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "73d42706-f6cd-4d17-83be-ccec966b5bc3",
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Introvoke Event Customization Theme does not match the schema.\", function () {",
+											"pm.expect(jsonData.message).to.eql(\"Introvoke Event Customization Theme does not match the schema.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "efe8d346-8fa6-46c0-818b-2efde307faff",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "invalid eventId_add event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "be7f67e3-2434-45c6-9d53-0cada956d78f",
+										"exec": [
+											"pm.test(\"Status code is 404 Not Found\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "9480e428-c1cf-4ca2-8a10-ce1041c3f356",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"dsfgdb\",\n    \"defaultTheme\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{invalid_eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_add event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "52f76519-cd85-463c-b78b-ab58c5bbad1c",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "2a9afc87-8f9a-475c-937d-ca88a20e771c",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_add event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "97c39659-8487-45e5-b73e-b8831b22d125",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "12337667-6c0e-4963-92ee-4489c39b206d",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						}
+					],
+					"id": "2c42f2c6-dd76-4634-8843-5bc2ff539a00",
+					"description": "### **Adds or updates event customization theme overrides that will be applied for the event. This endpoint can be used by clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/post_customizations-events-event-eventid**](https://docs.introvoke.com/reference/post_customizations-events-event-eventid)"
+				},
+				{
+					"name": "return event theme overrides",
+					"item": [
+						{
+							"name": "return event theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c23edbbd-af2c-46dc-8eb9-50d614b8f021",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"name: Testing theme\", function () {",
+											"pm.expect(jsonData.name).to.eql(\"Testing theme\");",
+											"});",
+											"",
+											"pm.test(\"defaultTheme: true\", function () {",
+											"pm.expect(jsonData.defaultTheme).to.eql(true);",
+											"});",
+											"",
+											"pm.test(\"fonts: isPrimary true\", function () {",
+											"pm.expect(jsonData.fonts[0].isPrimary).to.eql(true);",
+											"});",
+											"",
+											"pm.test(\"fontName: Inter\", function () {",
+											"pm.expect(jsonData.fonts[0].fontName).to.eql(\"Inter\");",
+											"});",
+											"",
+											"pm.test(\"fontUrl\", function () {",
+											"pm.expect(jsonData.fonts[0].fontUrl).to.eql(\"https://fonts.googleapis.com/css2?family=Inter&display=swap\");",
+											"});",
+											"",
+											"",
+											"//schema validation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"object\",",
+											"        properties:{",
+											"            \"name\":{\"type\":\"string\"},",
+											"            \"defaultTheme\":{\"type\":\"boolean\"},",
+											"            \"brandColors\":{\"type\":\"array\"},",
+											"            \"fonts\":{\"type\":\"array\",",
+											"                properties: {",
+											"                    \"isPrimary\": {\"type\":\"boolean\"},",
+											"                    \"fontName\": {\"type\":\"string\"},",
+											"                    \"fontUrl\": {\"type\":\"string\"}",
+											"",
+											"            }},",
+											"            ",
+											"        }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "cdf6bab3-ce3a-4553-ba14-742adc099897",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_return event theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "2afa0a06-f529-4d00-980b-1725eadee327",
+										"exec": [
+											"pm.test(\"Status code is 400 Bad Request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "792ecfe5-48cc-4207-b46e-bba50f63db6f",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/event/{{invalid_eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return event theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "43a19a67-b24c-4e5a-ac57-b73f6d8460bb",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "0e707c1d-85d7-45a7-a2ae-6b9f7d88d1d8",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return event theme",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "17da4673-aef0-4718-994e-1f818578122c",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "516382a9-1c07-4e51-af3e-65c0b1611cf1",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						}
+					],
+					"id": "5c4c09dc-0b3d-43e4-b44b-95b4ea8c28e5",
+					"description": "### **Returns the event customization theme overrides over the platform and event company customization theme for the event. This endpoint can be used for clients which update to theme or for preview.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-event-eventid**](https://docs.introvoke.com/reference/get_customizations-events-event-eventid)"
+				},
+				{
+					"name": "delete event customization theme overrides",
+					"item": [
+						{
+							"name": "delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "cccbd975-cd93-499d-9333-a6f93314b854",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "c8f9b20b-686a-416b-afe6-121967babbfa",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "delete again event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "8a69110c-41fd-4c51-ad4f-0f5fb51d3ff5",
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "40ea2ec4-6f13-48f0-bfb8-30952acb1873",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c33d110c-38d4-4b6b-9b2b-fbdfa2dcf0fb",
+										"exec": [
+											"pm.test(\"Status code is 400 Bad Request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "461503e3-b282-404f-9e78-2902d6ce15be",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{invalid_eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "9a190658-e317-401f-9bb0-40379b75e4ff",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "cd30ba70-b4da-4e3c-b17b-8402e59aecb8",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_delete event customization theme overrides",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "441f6e74-5226-4c39-ae72-4043525965ea",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "fff7b43f-2d8b-4d30-a1fe-f5c81ed90d69",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/event/{{eventId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "delete event",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "5b7228de-5bda-40e5-b203-c14d38e1aca6",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "99080298-e16d-46f4-84ac-e6b2c742aed9",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{url}}/api/v1/event/{{eventId}}"
+							},
+							"response": []
+						}
+					],
+					"id": "d5cc9386-d52d-442d-818a-d5fb46a6186e",
+					"description": "### **Deletes the event customization theme overrides for the event. All events default to company specific event customization theme, if it exists or the default platform theme, after deletion.**\n\n### [**https://docs.introvoke.com/reference/delete_customizations-events-event-eventid**](https://docs.introvoke.com/reference/delete_customizations-events-event-eventid)"
+				}
+			],
+			"id": "1210d2a3-ff38-4929-9741-a056df379a52"
+		},
+		{
+			"name": "company theme fonts",
+			"item": [
+				{
+					"name": "add new fonts for the company",
+					"item": [
+						{
+							"name": "add new font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c2ca6997-05b5-4a77-8fdb-9fd9149349d9",
+										"exec": [
+											"pm.test(\"Status code is 202 Accepted\", function () {",
+											"    pm.response.to.have.status(202);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"pm.environment.set(\"font_id\", jsonData.uid);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "72b97eed-6b2d-4667-a153-a894b8af0106",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"fontName\": \"Inter\",\n    \"fontUrl\": \"https://fonts.googleapis.com/css2?family=Inter&display=swap\",\n    \"isIntrovokeManaged\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts"
+							},
+							"response": []
+						},
+						{
+							"name": "add with wrong schema Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "73d42706-f6cd-4d17-83be-ccec966b5bc3",
+										"exec": [
+											"pm.test(\"Status code is 400 Bad request\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: Font Info does not match the schema.\", function () {",
+											"pm.expect(jsonData.message).to.eql(\"Font Info does not match the schema.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "2129b582-5cd0-4eac-aacd-6864b7723ae1",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"fontName\": \"\",\n    \"fontUrl\": \"\",\n    \"isIntrovokeManaged\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts"
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_add new font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "4c087dc7-d4be-4443-b9ec-26fe60f92170",
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "3d6d21d5-2cab-42e9-a453-d868bc82dcf3",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"uid\": \"\",\n    \"fontName\": \"\",\n    \"fontUrl\": \"\",\n    \"isIntrovokeManaged\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/fonts"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_add new font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "ac79eb3b-8f55-4bff-bf87-d2a5261ab4f0",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "5172d939-1368-4e60-9ec7-3b71d7343b9a",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_add new font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "a2ce955b-e3c0-4157-912a-efd780c795c8",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "52dae400-6e1f-4534-b6e1-0d18fae5f4c8",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts"
+							},
+							"response": []
+						}
+					],
+					"id": "2a3d10a4-c623-4f2c-a886-2deefdb42133",
+					"description": "### **Add new fonts for the company. The value is stored at the company level, but can be used by customization themes on both event and company levels. If the name of the font, matches the existing font, it will update the font URL.**\n\n### [**https://docs.introvoke.com/reference/post_customizations-events-company-companyid-fonts**](https://docs.introvoke.com/reference/post_customizations-events-company-companyid-fonts)"
+				},
+				{
+					"name": "return list of customized fonts",
+					"item": [
+						{
+							"name": "return font list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "4acc6fe1-bea4-41e2-a6d3-62dd375bcf9b",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"uid\", function () {",
+											"pm.expect(jsonData[1].uid).to.eql(pm.environment.get(\"font_id\"));",
+											"});",
+											"pm.test(\"fontName\", function () {",
+											"pm.expect(jsonData[1].fontName).to.eql(\"Inter\");",
+											"});",
+											"pm.test(\"fontUrl\", function () {",
+											"pm.expect(jsonData[1].fontUrl).to.eql(\"https://fonts.googleapis.com/css2?family=Inter&display=swap\");",
+											"});",
+											"pm.test(\"isIntrovokeManaged\", function () {",
+											"pm.expect(jsonData[1].isIntrovokeManaged).to.eql(true);",
+											"});",
+											"",
+											"",
+											"//schema vaildation",
+											"const ajv = require('ajv');",
+											"const Ajv = ajv();",
+											"pm.test(\"schema validation\", ()=>{",
+											"    const schema = {",
+											"        type: \"array\",",
+											"        properties:{",
+											"            \"uid\":{\"type\":\"string\"},",
+											"            \"fontName\":{\"type\":\"string\"},",
+											"            \"fontUrl\":{\"type\":\"string\"},",
+											"            \"isIntrovokeManaged\":{\"type\":\"string\"},",
+											"            ",
+											"    }",
+											"    }",
+											"",
+											"    const validate = Ajv.compile(schema);",
+											"    const res = pm.response.json();",
+											"    const isValid = validate(res);",
+											"    pm.expect(isValid).to.be.true;",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "3d679f32-1551-4af1-a406-f2553dbb50bf",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts"
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_return font list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "addf5dba-80ed-49a5-8dbb-7f0b6adab24c",
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "f96c1165-8e0f-4dea-9b4e-e02ad888b343",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/fonts"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_return font list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "4b1fd304-2a65-4591-be0e-908cbb4adfc9",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "99c5f301-9bd3-4855-8289-c226f1aa799e",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_return font list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "475fddf6-474d-449f-810b-25c0ead6049c",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "f7a97487-7356-4ede-bb4c-96506bc5b163",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "GET",
+								"header": [],
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts"
+							},
+							"response": []
+						}
+					],
+					"id": "001f7c56-4310-48dc-a9e5-fce723071331",
+					"description": "### **Returns list of customized fonts associated with the company.**\n\n### [**https://docs.introvoke.com/reference/get_customizations-events-company-companyid-fonts**](https://docs.introvoke.com/reference/get_customizations-events-company-companyid-fonts)"
+				},
+				{
+					"name": "unregister font associated with company",
+					"item": [
+						{
+							"name": "unregister font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "4aec0375-1d3b-49ae-aa9c-51f0136d313b",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "45088528-8ea9-4012-811b-144d44812162",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts/font/{{font_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "again unregister same font id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "4aec0375-1d3b-49ae-aa9c-51f0136d313b",
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "80d435c9-9260-4f76-b2c7-f0c97cf650b1",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts/font/{{font_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "invalid companyId_unregister font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c2d2d122-b7b8-4e85-b0d6-9572559b00da",
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "5fadc777-b242-4a1a-8703-10a39a56fbfe",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{invalid_companyId}}/fonts/font/{{font_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "without token_unregister font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "461703d4-98bd-4960-88c4-0d9e3b94e031",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"message: No token found in the request\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"No token found in the request\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "125e5823-5187-47f6-9d60-a68d2e221ddf",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts/font/{{fontId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "wrong token_unregister font",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "242be681-1ec5-4c3e-a9d6-942db74c5612",
+										"exec": [
+											"pm.test(\"Status code is 401 Unauthorized\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"let jsonData = pm.response.json();",
+											"pm.test(\"Invalid token\", function () {",
+											"    pm.expect(jsonData.message).to.eql(\"Invalid token\");",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "36ee8d84-b8f3-4405-baf7-1c37cc4d35f0",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "{{wrong_token}}"
+									}
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"defaultTheme\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/api/customizations/events/company/{{companyId}}/fonts/font/{{fontId}}"
+							},
+							"response": []
+						}
+					],
+					"id": "0210d737-fb55-4573-9484-3e00e29d72de",
+					"description": "### **Unregister the specified font associated with the specified company.**\n\n### [**https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-fonts-font-fontid**](https://docs.introvoke.com/reference/delete_customizations-events-company-companyid-fonts-font-fontid)"
+				}
+			],
+			"id": "88cb225a-5bb8-49f4-9ca1-c24288cd7354"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "{{jwt_access_token}}"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "63fc77cf-5cb2-4130-941c-ff84a9aed39c",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "6eeb84c4-f32d-45b8-adbd-3fc863cfd5de",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
